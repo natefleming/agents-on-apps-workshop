@@ -1,0 +1,10 @@
+.env.local
+e2e-chatbot-app-next/
+temp-app-templates/
+backend.log
+frontend.log
+__pycache__/
+*.pyc
+.venv/
+uv.lock
+.databricks/
