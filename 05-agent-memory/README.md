@@ -370,6 +370,18 @@ Deploy as usual:
 databricks bundle deploy
 ```
 
+## Step 4: Evaluate Your Agent
+
+Run the evaluation to test your agent:
+
+```bash
+uv run agent-evaluate
+```
+
+Note that the default `eval_dataset` in `evaluate_agent.py` tests basic tool usage. For memory-specific testing, you'll want to add multi-turn test cases or manually test via the chat UI, since evaluation runs each prompt independently (no shared thread).
+
+See [Chapter 2](../02-hello-agent/README.md#step-6-evaluate-your-agent) for a detailed explanation of how evaluation works.
+
 ## Key Takeaways
 
 - **Short-term memory** uses `AsyncCheckpointSaver` to persist conversation history per thread ID in Lakebase

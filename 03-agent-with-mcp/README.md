@@ -242,6 +242,30 @@ When deployed to Databricks Apps, the MCP client automatically authenticates usi
 
 For other MCP servers (SQL, Vector Search, etc.), you'll need to grant the app's service principal access to the underlying resources (warehouses, indexes, etc.).
 
+## Step 6: Evaluate Your Agent
+
+Run the evaluation to test both custom tools and MCP tools:
+
+```bash
+uv run agent-evaluate
+```
+
+This calls your `@invoke()` handler with the test prompts defined in `agent_server/evaluate_agent.py` and scores responses for relevance and safety using MLflow. Open the experiment UI to review results.
+
+To add MCP-specific test cases, edit the `eval_dataset` in `evaluate_agent.py`:
+
+```python
+{
+    "inputs": {
+        "request": {
+            "input": [{"role": "user", "content": "Write Python code to check if 97 is prime"}]
+        }
+    },
+},
+```
+
+See [Chapter 2](../02-hello-agent/README.md#step-6-evaluate-your-agent) for a detailed explanation of how evaluation works.
+
 ## Key Takeaways
 
 - **MCP servers provide tools without writing code** - just connect to a server and your agent gets its entire tool catalog

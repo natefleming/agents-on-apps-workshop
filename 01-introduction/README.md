@@ -137,8 +137,9 @@ Manages Python packages and defines entry points:
 
 ```toml
 [project.scripts]
-start-app = "scripts.start_app:main"        # Start backend + chat UI
-start-server = "agent_server.start_server:main"  # Start backend only
+start-app = "scripts.start_app:main"             # Start backend + chat UI
+start-server = "agent_server.start_server:main"   # Start backend only
+agent-evaluate = "agent_server.evaluate_agent:evaluate"  # Run offline evaluation
 ```
 
 ### `agent.py` - Your Agent
@@ -148,6 +149,10 @@ This is where you spend most of your time. It defines:
 1. What **model** your agent uses
 2. What **tools** your agent has access to
 3. How **requests are processed** (the `@invoke` and `@stream` functions)
+
+### `evaluate_agent.py` - Offline Evaluation
+
+Runs test prompts through your agent and scores the results using [MLflow evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor/). Run with `uv run agent-evaluate`. This is not part of the running server -- it's a separate tool for testing agent quality before deploying.
 
 ### `start_server.py` - Server Bootstrap
 

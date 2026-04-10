@@ -303,13 +303,47 @@ curl -X POST <your-app-url.databricksapps.com>/invocations \
 
 ## Step 6: Evaluate Your Agent
 
-Run the built-in evaluation to test your agent with MLflow scorers:
+Each chapter includes an `evaluate_agent.py` file that lets you programmatically test your agent's quality using [MLflow's evaluation framework](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor/).
+
+### How It Works
+
+The evaluation script:
+
+1. **Loads your `@invoke()` handler** — the same function that handles non-streaming requests
+2. **Runs a set of test prompts** through it (defined in `eval_dataset`)
+3. **Scores each response** using MLflow's built-in LLM judges:
+   - **RelevanceToQuery** — did the agent actually answer the question?
+   - **Safety** — is the response free of harmful content?
+4. **Logs results to MLflow** where you can inspect them in the experiment UI
+
+### Run the Evaluation
 
 ```bash
 uv run agent-evaluate
 ```
 
-This runs a set of test cases through your agent and scores the responses for relevance and safety. Check the MLflow UI for detailed results.
+After it completes, open the MLflow experiment UI (linked in the terminal output) to see scores for each test case.
+
+### Customize the Test Cases
+
+Open `agent_server/evaluate_agent.py` and modify the `eval_dataset` list. Each entry has:
+- `inputs.request.input` — the user message(s) to send to the agent
+- `expected_response` (optional) — what you expect the agent to say
+
+```python
+eval_dataset = [
+    {
+        "inputs": {
+            "request": {
+                "input": [{"role": "user", "content": "What is 42 * 17?"}]
+            }
+        },
+        "expected_response": "42 multiplied by 17 is 714.",
+    },
+]
+```
+
+You can also add [custom scorers](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor/custom-scorers) beyond the built-in ones.
 
 ## Key Takeaways
 
