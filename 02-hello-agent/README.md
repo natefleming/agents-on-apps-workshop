@@ -319,6 +319,14 @@ This runs a set of test cases through your agent and scores the responses for re
 - **Deployment** is `databricks sync` + `databricks apps deploy`.
 - **MLflow traces everything** automatically - check the experiment UI for debugging.
 
+## Reference
+
+- [Author an Agent](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent) -- Official guide for creating agents on Databricks
+- [Agent Framework Tools](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-tool) -- Adding tools to your agent
+- [Databricks Apps Deploy](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/deploy) -- Deploying apps via CLI
+- [MLflow Tracing](https://docs.databricks.com/aws/en/mlflow3/genai/tracing/app-instrumentation/) -- Custom tracing beyond autolog
+- [LangGraph Quickstart](https://langchain-ai.github.io/langgraph/quickstart/) -- LangGraph documentation
+
 ## What's Next
 
 In [Chapter 3](../03-agent-with-mcp/), you'll extend your agent with MCP (Model Context Protocol) servers, giving it access to Databricks' built-in code interpreter and other powerful tools without writing any tool code yourself.

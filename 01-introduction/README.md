@@ -11,7 +11,7 @@ An **Agent on an App** is an AI agent deployed as a Databricks App. Instead of d
 - Gets **automatic tracing** via MLflow for observability and debugging
 - Supports **on-behalf-of (OBO) authentication** so users interact with Databricks resources using their own credentials
 
-This is the recommended approach for building and deploying agents on Databricks.
+This is the recommended approach for building and deploying agents on Databricks. See the [official Agent Framework documentation](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent) for the full reference.
 
 ## Architecture Overview
 
@@ -179,7 +179,7 @@ app = agent_server.app
 
 ## Authentication: Resource Auth vs User API Scopes
 
-When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical.
+When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical. See the [Agent Framework authentication docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) and the [Databricks Apps auth docs](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) for the full reference.
 
 ```mermaid
 graph LR
@@ -458,6 +458,18 @@ curl -X POST <app-url>/invocations \
   -H "Content-Type: application/json" \
   -d '{ "input": [{ "role": "user", "content": "hello" }], "stream": true }'
 ```
+
+## Reference
+
+- [Author an Agent (Clone from GitHub)](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent) -- Official getting started guide
+- [Agent Framework Authentication](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) -- SP auth vs user auth for deployed agents
+- [Databricks Apps Auth](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) -- OBO tokens, user API scopes, security best practices
+- [Agent Framework Tools](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-tool) -- Adding tools, MCP servers, UC functions, vector search
+- [Databricks Apps Deploy](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/deploy) -- Deploying apps via CLI
+- [Databricks Apps Resources](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/resources) -- Configuring app resources and permissions
+- [Databricks Apps MLflow](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/mlflow) -- Linking MLflow experiments to apps
+- [MLflow ResponsesAgent](https://mlflow.org/docs/latest/genai/flavors/responses-agent-intro/) -- Input/output formats, tracing, agent authoring
+- [Databricks App Templates (GitHub)](https://github.com/databricks/app-templates) -- Official template repository
 
 ## What's Next
 

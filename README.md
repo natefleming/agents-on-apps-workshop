@@ -53,8 +53,13 @@ uv run start-app
 
 ## Reference
 
-- [Databricks Agent Framework Docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent)
-- [Databricks App Templates on GitHub](https://github.com/databricks/app-templates)
-- [MLflow ResponsesAgent Docs](https://mlflow.org/docs/latest/genai/flavors/responses-agent-intro/)
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
-- [Databricks Asset Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/)
+- [Author an Agent (Clone from GitHub)](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent) -- Official getting started guide
+- [Agent Framework Authentication](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) -- SP auth vs user-scoped auth
+- [Agent Framework Tools](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-tool) -- MCP servers, UC functions, vector search
+- [Databricks Apps Auth](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) -- OBO tokens, user API scopes
+- [Databricks Apps Deploy](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/deploy) -- Deploy via CLI
+- [Databricks Apps Resources](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/resources) -- Configure app resources and permissions
+- [Databricks Asset Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/) -- Declarative deployment
+- [MLflow ResponsesAgent Docs](https://mlflow.org/docs/latest/genai/flavors/responses-agent-intro/) -- Agent input/output format
+- [Databricks App Templates (GitHub)](https://github.com/databricks/app-templates) -- Official template repository
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) -- Agent orchestration framework

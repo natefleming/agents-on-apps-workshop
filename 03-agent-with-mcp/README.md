@@ -1,6 +1,6 @@
 # Chapter 3: Adding MCP Server Tools to Your Agent
 
-In this chapter, you'll extend your agent with **MCP (Model Context Protocol)** servers. Instead of writing tool functions by hand, you'll connect to Databricks' built-in MCP servers that provide powerful, pre-built tools -- including a **Python code interpreter** that every Databricks workspace has access to.
+In this chapter, you'll extend your agent with **MCP (Model Context Protocol)** servers. Instead of writing tool functions by hand, you'll connect to Databricks' built-in MCP servers that provide powerful, pre-built tools -- including a **Python code interpreter** that every Databricks workspace has access to. See the [Agent Framework Tools documentation](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-tool) for the full list of supported tool types.
 
 ## What is MCP?
 
@@ -250,12 +250,20 @@ For other MCP servers (SQL, Vector Search, etc.), you'll need to grant the app's
 - **Custom tools and MCP tools work together** - combine them to give your agent exactly the capabilities it needs
 - **Adding new MCP servers is one line of config** - no agent logic changes required
 
+## Reference
+
+- [Agent Framework Tools](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-tool) -- Adding MCP servers, UC functions, vector search, and other tools
+- [Agent Framework Authentication](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) -- Auth patterns for deployed agents
+- [Model Context Protocol](https://modelcontextprotocol.io/) -- MCP specification and ecosystem
+- [Author an Agent](https://docs.databricks.com/aws/en/generative-ai/agent-framework/author-agent) -- Official getting started guide
+- [MLflow Evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor/) -- Evaluating agent quality with scorers
+
 ## What's Next
 
 You now have a solid foundation for building agents on Databricks Apps. From here, you can:
 
 - Add more MCP servers for SQL, Vector Search, or Genie
 - Build custom MCP servers with FastMCP for your own APIs
-- Add on-behalf-of (OBO) authentication for user-scoped access
+- Add on-behalf-of (OBO) authentication for user-scoped access ([see auth docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication))
 - Create evaluation datasets to systematically test your agent
 - Deploy to production with proper resource permissions
