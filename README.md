@@ -12,7 +12,7 @@ Build, test, and deploy AI agents on Databricks Apps. This workshop takes you fr
 
 ## Prerequisites
 
-- A Databricks workspace with access to Foundation Model APIs (e.g., `databricks-claude-sonnet-4`)
+- A Databricks workspace with access to Foundation Model APIs (e.g., `databricks-claude-sonnet-4-5`)
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
 - [nvm](https://github.com/nvm-sh/nvm) with Node 20 LTS (for the chat UI)

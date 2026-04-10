@@ -52,7 +52,7 @@ resources:
         - name: llm
           description: "Foundation model endpoint for the agent"
           serving_endpoint:
-            name: databricks-claude-sonnet-4
+            name: databricks-claude-sonnet-4-5
             permission: CAN_QUERY
 
       # Who can access the deployed app

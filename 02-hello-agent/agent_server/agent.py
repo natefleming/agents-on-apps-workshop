@@ -56,7 +56,7 @@ def calculate(expression: str) -> str:
 TOOLS = [get_current_time, calculate]
 
 # Configure the LLM - this uses Databricks Foundation Model APIs
-MODEL = ChatDatabricks(endpoint="databricks-claude-sonnet-4")
+MODEL = ChatDatabricks(endpoint="databricks-claude-sonnet-4-5")
 
 
 def init_agent():

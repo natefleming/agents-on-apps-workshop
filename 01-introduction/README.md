@@ -15,32 +15,39 @@ This is the recommended approach for building and deploying agents on Databricks
 
 ## Architecture Overview
 
-```
-+-----------------------------------------------------------+
-|                    Databricks App                           |
-|                                                             |
-|  +-----------------+     +-------------------------------+  |
-|  |   Chat UI        |     |   MLflow AgentServer (FastAPI) | |
-|  |   (Next.js)      |---->|   /invocations endpoint       | |
-|  |   Port 8000      |     |                               | |
-|  +-----------------+     |   +-------------------------+ | |
-|                           |   |   Your Agent Code       | | |
-|                           |   |   (LangGraph/LangChain) | | |
-|                           |   |                         | | |
-|                           |   |   @invoke() / @stream() | | |
-|                           |   +-------------------------+ | |
-|                           +---------|--------|------------+ |
-+----------------------------|--------|--------|-------------+
-                              |        |        |
-                     +--------+   +----+   +----+--------+
-                     |            |         |             |
-              +------v---+  +----v----+  +-v-----------+ |
-              | LLM      |  | MCP     |  | Custom      | |
-              | Endpoint  |  | Servers |  | Tools       | |
-              | (Claude,  |  | (Code   |  | (@tool)     | |
-              |  GPT, etc)|  |  Exec,  |  |             | |
-              +----------+  |  SQL)   |  +-------------+ |
-                             +---------+                   |
+```mermaid
+graph TB
+    subgraph APP["Databricks App"]
+        UI["Chat UI<br/><i>Next.js on port 8000</i>"]
+        subgraph SERVER["MLflow AgentServer (FastAPI)"]
+            EP["/invocations endpoint"]
+            subgraph AGENT["Your Agent Code"]
+                INV["@invoke()"]
+                STR["@stream()"]
+            end
+        end
+    end
+
+    UI -->|HTTP POST| EP
+    EP --> INV
+    EP --> STR
+
+    AGENT -->|ChatDatabricks| LLM["LLM Endpoint<br/><i>Claude, GPT, etc.</i>"]
+    AGENT -->|DatabricksMCPClient| MCP["MCP Servers<br/><i>SQL, Genie, UC Functions</i>"]
+    AGENT -->|Direct call| TOOLS["Custom Tools<br/><i>@tool functions</i>"]
+    AGENT -->|Auto-trace| MLFLOW["MLflow<br/><i>Traces & Experiments</i>"]
+
+    style APP fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
+    style SERVER fill:#1B5162,stroke:#FF3621,stroke-width:1px,color:#fff
+    style AGENT fill:#0B2026,stroke:#618693,stroke-width:1px,color:#fff
+    style UI fill:#FF3621,stroke:#FF3621,color:#fff
+    style EP fill:#1B5162,stroke:#618693,color:#fff
+    style INV fill:#00A972,stroke:#00A972,color:#fff
+    style STR fill:#00A972,stroke:#00A972,color:#fff
+    style LLM fill:#4259FE,stroke:#4259FE,color:#fff
+    style MCP fill:#FEAB03,stroke:#FEAB03,color:#0B2026
+    style TOOLS fill:#970F29,stroke:#970F29,color:#fff
+    style MLFLOW fill:#618693,stroke:#618693,color:#fff
 ```
 
 ## Key Components
@@ -89,7 +96,7 @@ Your agent uses Databricks-hosted LLMs via the `ChatDatabricks` class:
 ```python
 from databricks_langchain import ChatDatabricks
 
-model = ChatDatabricks(endpoint="databricks-claude-sonnet-4")
+model = ChatDatabricks(endpoint="databricks-claude-sonnet-4-5")
 ```
 
 This works both locally (using your Databricks CLI credentials) and when deployed (using the app's service principal).
@@ -98,7 +105,6 @@ This works both locally (using your Databricks CLI credentials) and when deploye
 
 MCP is an open protocol that lets your agent connect to external tool servers. Databricks provides built-in MCP servers for:
 
-- **`system.ai`**: Code interpreter (Python execution), and other AI tools
 - **SQL**: Query SQL warehouses
 - **Vector Search**: Search vector indexes
 - **Genie**: Natural language data exploration
@@ -171,7 +177,228 @@ agent_server = AgentServer("ResponsesAgent", enable_chat_proxy=True)
 app = agent_server.app
 ```
 
+## Authentication: Resource Auth vs User API Scopes
+
+When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical.
+
+```mermaid
+graph LR
+    subgraph SP_AUTH["Service Principal Auth"]
+        direction TB
+        U1["Any User"] --> APP1["Databricks App"]
+        APP1 -->|"SP credentials<br/>(auto-injected)"| RES1["Databricks Resources"]
+        note1["All users share<br/>same permissions"]
+    end
+
+    subgraph OBO_AUTH["User API Scopes (OBO)"]
+        direction TB
+        U2["Logged-in User"] -->|"OAuth login"| APP2["Databricks App"]
+        APP2 -->|"x-forwarded-access-token<br/>(user's identity)"| RES2["Databricks Resources"]
+        note2["Each user's own<br/>permissions enforced"]
+    end
+
+    style SP_AUTH fill:#1B3139,stroke:#4259FE,stroke-width:2px,color:#fff
+    style OBO_AUTH fill:#1B3139,stroke:#00A972,stroke-width:2px,color:#fff
+    style U1 fill:#618693,stroke:#618693,color:#fff
+    style U2 fill:#618693,stroke:#618693,color:#fff
+    style APP1 fill:#4259FE,stroke:#4259FE,color:#fff
+    style APP2 fill:#00A972,stroke:#00A972,color:#fff
+    style RES1 fill:#1B5162,stroke:#618693,color:#fff
+    style RES2 fill:#1B5162,stroke:#618693,color:#fff
+    style note1 fill:none,stroke:none,color:#618693
+    style note2 fill:none,stroke:none,color:#618693
+```
+
+### App Service Principal (Resource Auth)
+
+Every Databricks App gets a dedicated **service principal (SP)** that acts as its identity. When you declare resources in `databricks.yml` or via the App UI, you grant this SP specific permissions:
+
+```yaml
+# databricks.yml
+resources:
+  apps:
+    my_agent:
+      resources:
+        - name: llm
+          serving_endpoint:
+            name: databricks-claude-sonnet-4-5
+            permission: CAN_QUERY       # SP can call this endpoint
+        - name: experiment
+          experiment:
+            experiment_name: /Users/me/my-exp
+            permission: CAN_MANAGE      # SP can write traces here
+```
+
+In your Python code, the SP auth happens automatically:
+
+```python
+from databricks.sdk import WorkspaceClient
+
+# This uses the app's service principal credentials automatically
+# (DATABRICKS_CLIENT_ID / DATABRICKS_CLIENT_SECRET env vars are injected)
+workspace_client = WorkspaceClient()
+```
+
+**Use SP auth when:**
+- All users should see the same data/results
+- Background tasks, logging, monitoring
+- Accessing shared resources (LLM endpoints, MLflow experiments)
+- Simpler setup -- no OAuth configuration needed
+
+**Limitation:** Every user sees the same data. Unity Catalog row/column filters are **not** applied because the SP is making the request, not the individual user.
+
+### User API Scopes (On-Behalf-Of / OBO)
+
+With user API scopes, the app accesses Databricks APIs **as the logged-in user**. Databricks forwards the user's OAuth token to your app via the `x-forwarded-access-token` HTTP header.
+
+You declare which scopes the app needs in `databricks.yml`:
+
+```yaml
+# databricks.yml
+resources:
+  apps:
+    my_agent:
+      user_api_scopes:
+        - sql                          # Query SQL warehouses as user
+        - serving.serving-endpoints    # Call endpoints as user
+        - dashboards.genie             # Access Genie spaces as user
+        - catalog.catalogs:read        # Read UC catalogs as user
+        - catalog.schemas:read         # Read UC schemas as user
+        - catalog.tables:read          # Read UC tables as user
+```
+
+In your Python code, you extract the user's token from request headers:
+
+```python
+from databricks.sdk import WorkspaceClient
+from mlflow.genai.agent_server import get_request_headers
+
+def get_user_workspace_client() -> WorkspaceClient:
+    """Authenticate as the requesting user (OBO)."""
+    token = get_request_headers().get("x-forwarded-access-token")
+    return WorkspaceClient(token=token, auth_type="pat")
+
+# Now API calls use the user's identity and permissions
+user_client = get_user_workspace_client()
+```
+
+**Use OBO auth when:**
+- Different users should see different data (row/column filters apply)
+- Compliance requires per-user audit trails
+- Users have different permissions on tables, warehouses, etc.
+- Fine-grained access control is required
+
+### Comparison
+
+| Aspect | Service Principal (Resource Auth) | User API Scopes (OBO) |
+|--------|-----------------------------------|----------------------|
+| **Identity** | App's service principal | Logged-in user |
+| **Configuration** | `resources:` with `permission:` | `user_api_scopes:` list |
+| **Code pattern** | `WorkspaceClient()` (automatic) | `WorkspaceClient(token=header_token)` |
+| **Unity Catalog filters** | Not applied | Applied per user |
+| **Audit logs** | Logged as service principal | Logged as individual user |
+| **Setup complexity** | Simple -- grant SP permissions | Requires OAuth scopes, user consent |
+| **Use case** | Shared resources, background tasks | User-specific data access |
+
+### Using Both Together
+
+Most production agents use **both** approaches. The service principal handles shared resources while OBO handles user-specific data:
+
+```mermaid
+graph TB
+    USER["Logged-in User"] --> APP["Databricks App<br/><i>Your Agent</i>"]
+
+    APP -->|"SP credentials<br/>(automatic)"| LLM["LLM Endpoint<br/><b>CAN_QUERY</b>"]
+    APP -->|"SP credentials<br/>(automatic)"| MLF["MLflow Experiment<br/><b>CAN_MANAGE</b>"]
+    APP -->|"User's OAuth token<br/>(x-forwarded-access-token)"| SQL["SQL Warehouse<br/><b>User's permissions</b>"]
+    APP -->|"User's OAuth token<br/>(x-forwarded-access-token)"| UC["Unity Catalog Tables<br/><b>Row/column filters applied</b>"]
+
+    style USER fill:#618693,stroke:#618693,color:#fff
+    style APP fill:#FF3621,stroke:#FF3621,color:#fff
+    style LLM fill:#4259FE,stroke:#4259FE,color:#fff
+    style MLF fill:#4259FE,stroke:#4259FE,color:#fff
+    style SQL fill:#00A972,stroke:#00A972,color:#fff
+    style UC fill:#00A972,stroke:#00A972,color:#fff
+```
+
+```python
+# SP auth for shared resources (LLM, MLflow)
+sp_client = WorkspaceClient()  # Automatic SP credentials
+
+# OBO auth for user-specific resources (tables, warehouses)
+def get_user_client():
+    token = get_request_headers().get("x-forwarded-access-token")
+    return WorkspaceClient(token=token, auth_type="pat")
+```
+
+For example:
+- **SP auth** calls the LLM serving endpoint (all users use the same model)
+- **OBO auth** queries a SQL warehouse (each user sees only their permitted data)
+
+### Available User API Scopes
+
+| Scope | What it grants |
+|-------|---------------|
+| `sql` | Query SQL warehouses |
+| `serving.serving-endpoints` | List and query model serving endpoints |
+| `dashboards.genie` | Access Genie spaces |
+| `files.files` | Manage files and directories |
+| `catalog.catalogs:read` | Read Unity Catalog catalogs |
+| `catalog.schemas:read` | Read Unity Catalog schemas |
+| `catalog.tables:read` | Read Unity Catalog tables |
+| `catalog.connections` | Access Unity Catalog connections |
+| `vectorsearch.vector-search-indexes` | Access vector search indexes |
+| `vectorsearch.vector-search-endpoints` | Access vector search endpoints |
+
+Two scopes are always included by default: `iam.access-control:read` and `iam.current-user:read`.
+
+### Local Development Note
+
+When running locally, there is no `x-forwarded-access-token` header. The `get_user_workspace_client()` helper should fall back to default credentials:
+
+```python
+import os
+from databricks.sdk import WorkspaceClient
+from mlflow.genai.agent_server import get_request_headers
+
+def get_user_workspace_client() -> WorkspaceClient:
+    """Get a workspace client -- OBO in Databricks Apps, default locally."""
+    if "DATABRICKS_APP_NAME" in os.environ:
+        token = get_request_headers().get("x-forwarded-access-token")
+        return WorkspaceClient(token=token, auth_type="pat")
+    else:
+        return WorkspaceClient()  # Uses CLI/env auth locally
+```
+
 ## Development Workflow
+
+```mermaid
+graph LR
+    subgraph DEV["Local Development"]
+        AUTH["databricks auth login"] --> ENV["Configure .env.local"]
+        ENV --> SYNC["uv sync"]
+        SYNC --> RUN["uv run start-app"]
+        RUN --> TEST["Test at localhost:8000"]
+        TEST -->|"Edit agent.py"| RUN
+    end
+
+    subgraph DEPLOY["Deploy to Databricks"]
+        BUNDLE["databricks bundle deploy"]
+        BUNDLE --> LIVE["App is live at<br/>*.databricksapps.com"]
+    end
+
+    TEST -->|"Ready to ship"| BUNDLE
+
+    style DEV fill:#1B3139,stroke:#00A972,stroke-width:2px,color:#fff
+    style DEPLOY fill:#1B3139,stroke:#4259FE,stroke-width:2px,color:#fff
+    style AUTH fill:#618693,stroke:#618693,color:#fff
+    style ENV fill:#618693,stroke:#618693,color:#fff
+    style SYNC fill:#618693,stroke:#618693,color:#fff
+    style RUN fill:#00A972,stroke:#00A972,color:#fff
+    style TEST fill:#FF3621,stroke:#FF3621,color:#fff
+    style BUNDLE fill:#4259FE,stroke:#4259FE,color:#fff
+    style LIVE fill:#00A972,stroke:#00A972,color:#fff
+```
 
 ### Local Development
 

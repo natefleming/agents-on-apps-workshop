@@ -93,7 +93,7 @@ def init_mcp_client(workspace_client: WorkspaceClient) -> DatabricksMultiServerM
 # Agent Configuration
 # ---------------------------------------------------------------------------
 
-MODEL = ChatDatabricks(endpoint="databricks-claude-sonnet-4")
+MODEL = ChatDatabricks(endpoint="databricks-claude-sonnet-4-5")
 
 
 async def init_agent(workspace_client: Optional[WorkspaceClient] = None):

@@ -6,23 +6,44 @@ In this chapter, you'll extend your agent with **MCP (Model Context Protocol)** 
 
 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) is an open protocol that standardizes how AI agents discover and use tools. Think of it like a USB port for AI tools -- any MCP-compatible server can plug into any MCP-compatible agent.
 
+```mermaid
+graph LR
+    AGENT["Your Agent<br/><i>LangGraph</i>"] -->|"get_tools()"| CLIENT["DatabricksMulti<br/>ServerMCPClient"]
+
+    CLIENT --> MCP1["UC Functions MCP<br/><i>/api/2.0/mcp/functions/system/ai</i>"]
+    CLIENT --> MCP2["SQL MCP<br/><i>/api/2.0/mcp/sql</i>"]
+    CLIENT --> MCP3["Vector Search MCP<br/><i>/api/2.0/mcp/vector-search/...</i>"]
+
+    MCP1 -->|"python_exec"| T1["Code Interpreter"]
+    MCP2 -->|"execute_sql"| T2["SQL Warehouse"]
+    MCP3 -->|"search"| T3["Vector Index"]
+
+    style AGENT fill:#FF3621,stroke:#FF3621,color:#fff
+    style CLIENT fill:#1B5162,stroke:#618693,color:#fff
+    style MCP1 fill:#00A972,stroke:#00A972,color:#fff
+    style MCP2 fill:#4259FE,stroke:#4259FE,color:#fff
+    style MCP3 fill:#FEAB03,stroke:#FEAB03,color:#0B2026
+    style T1 fill:#1B3139,stroke:#618693,color:#fff
+    style T2 fill:#1B3139,stroke:#618693,color:#fff
+    style T3 fill:#1B3139,stroke:#618693,color:#fff
+```
+
 Databricks provides several built-in MCP servers:
 
 | MCP Server | URL Pattern | What It Does |
 |------------|-------------|--------------|
-| **system.ai** | `/api/2.0/mcp/functions/system/ai` | Code interpreter (`python_exec`), and other AI tools |
 | **SQL** | `/api/2.0/mcp/sql` | Query SQL warehouses with natural language |
 | **Vector Search** | `/api/2.0/mcp/vector-search/{catalog}/{schema}` | Search vector indexes |
 | **Genie** | `/api/2.0/mcp/genie/{space_id}` | Natural language data exploration |
 | **UC Functions** | `/api/2.0/mcp/functions/{catalog}/{schema}` | Call Unity Catalog functions |
 
-In this chapter, we'll use the **`system.ai`** MCP server because every Databricks workspace has it. It gives your agent a built-in Python code interpreter -- the agent can write and execute Python code to answer complex questions.
+In this chapter, we'll use the **UC Functions** MCP server pointing at the `system.ai` catalog/schema, which every Databricks workspace has access to. It gives your agent a built-in Python code interpreter (`python_exec`) -- the agent can write and execute Python code to answer complex questions.
 
 ## What You'll Build
 
 An agent that combines:
 1. **Custom tools** (from Chapter 2) - `get_current_time` and `calculate`
-2. **MCP tools** from Databricks `system.ai` - primarily `python_exec` for code execution
+2. **MCP tools** from the `system.ai` UC functions - primarily `python_exec` for code execution
 
 This means your agent can answer simple questions with its custom tools, and tackle complex tasks (data analysis, chart generation, etc.) by writing and executing Python code.
 
@@ -106,6 +127,31 @@ When a user sends a message, the LLM sees descriptions of ALL available tools (b
 - **Simple math?** Use the `calculate` custom tool
 - **What time is it?** Use the `get_current_time` custom tool
 - **Complex analysis, data manipulation, or code?** Use `python_exec` from the MCP server
+
+```mermaid
+flowchart TD
+    MSG["User Message"] --> LLM{"LLM Analyzes<br/>Intent"}
+
+    LLM -->|"What time is it?"| CT1["get_current_time<br/><i>Custom Tool</i>"]
+    LLM -->|"What is 2+2?"| CT2["calculate<br/><i>Custom Tool</i>"]
+    LLM -->|"Plot a chart of..."| MCP["python_exec<br/><i>MCP Tool</i>"]
+    LLM -->|"Tell me a joke"| DIRECT["Direct LLM Response<br/><i>No tool needed</i>"]
+
+    CT1 --> RESULT["Combine result<br/>into response"]
+    CT2 --> RESULT
+    MCP --> RESULT
+    DIRECT --> RESULT
+    RESULT --> USER["User sees response"]
+
+    style MSG fill:#618693,stroke:#618693,color:#fff
+    style LLM fill:#FF3621,stroke:#FF3621,color:#fff
+    style CT1 fill:#970F29,stroke:#970F29,color:#fff
+    style CT2 fill:#970F29,stroke:#970F29,color:#fff
+    style MCP fill:#00A972,stroke:#00A972,color:#fff
+    style DIRECT fill:#4259FE,stroke:#4259FE,color:#fff
+    style RESULT fill:#1B5162,stroke:#618693,color:#fff
+    style USER fill:#1B3139,stroke:#618693,color:#fff
+```
 
 ## Step 3: Run Locally
 
