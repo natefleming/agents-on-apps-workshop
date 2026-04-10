@@ -92,41 +92,57 @@ The `add_messages` annotation tells LangGraph to **append** new messages to the 
 The agent is created with a checkpointer:
 
 ```python
-async def init_agent(checkpointer=None):
-    tools = [get_current_time, calculate]
-    model = ChatDatabricks(endpoint="databricks-claude-sonnet-4-5")
+async def init_agent(
+    checkpointer: Optional[Any] = None,
+    store: Optional[BaseStore] = None,
+) -> CompiledStateGraph:
+    tools: list = [get_current_time, calculate] + memory_tools()
+    model: ChatDatabricks = ChatDatabricks(endpoint=LLM_ENDPOINT_NAME)
     return create_agent(
         model=model,
         tools=tools,
-        system_prompt="You are a helpful assistant.",
-        checkpointer=checkpointer,
+        system_prompt=SYSTEM_PROMPT,
+        checkpointer=checkpointer,  # Short-term memory
+        store=store,                # Long-term memory
         state_schema=StatefulAgentState,
     )
 ```
 
-And the stream handler opens a checkpointer connection for each request:
+And the stream handler opens both memory connections for each request:
 
 ```python
 @stream()
-async def stream_handler(request):
-    thread_id = _get_or_create_thread_id(request)
+async def stream_handler(
+    request: ResponsesAgentRequest,
+) -> AsyncGenerator[ResponsesAgentStreamEvent, None]:
+    thread_id: str = get_or_create_thread_id(request)
+    user_id: Optional[str] = get_user_id(request)
 
-    async with AsyncCheckpointSaver(
-        instance_name=LAKEBASE_INSTANCE_NAME,
-    ) as checkpointer:
+    config: dict[str, Any] = {"configurable": {"thread_id": thread_id}}
+    if user_id:
+        config["configurable"]["user_id"] = user_id
+
+    input_state: dict[str, Any] = {
+        "messages": to_chat_completions_input([i.model_dump() for i in request.input]),
+        "custom_inputs": dict(request.custom_inputs or {}),
+    }
+
+    # Open both short-term (checkpointer) and long-term (store) connections
+    async with AsyncCheckpointSaver(instance_name=LAKEBASE_INSTANCE_NAME) as checkpointer:
         await checkpointer.setup()
-        agent = await init_agent(checkpointer=checkpointer)
+        async with AsyncDatabricksStore(
+            instance_name=LAKEBASE_INSTANCE_NAME,
+            embedding_endpoint=EMBEDDING_ENDPOINT,
+            embedding_dims=EMBEDDING_DIMS,
+        ) as store:
+            await store.setup()
+            config["configurable"]["store"] = store
+            agent = await init_agent(checkpointer=checkpointer, store=store)
 
-        config = {"configurable": {"thread_id": thread_id}}
-        input_state = {
-            "messages": to_chat_completions_input([...]),
-            "custom_inputs": dict(request.custom_inputs or {}),
-        }
-
-        async for event in process_agent_astream_events(
-            agent.astream(input_state, config, stream_mode=["updates", "messages"])
-        ):
-            yield event
+            async for event in process_agent_astream_events(
+                agent.astream(input_state, config, stream_mode=["updates", "messages"])
+            ):
+                yield event
 ```
 
 ```mermaid
@@ -183,64 +199,91 @@ The agent gets three tools for managing long-term memory:
 @tool
 async def get_user_memory(query: str, config: RunnableConfig) -> str:
     """Search for relevant information about the user from long-term memory."""
-    user_id = config.get("configurable", {}).get("user_id")
-    store = config.get("configurable", {}).get("store")
-    namespace = ("user_memories", user_id)
+    user_id: Optional[str] = config.get("configurable", {}).get("user_id")
+    if not user_id:
+        return "Memory not available - no user_id provided."
+    store: Optional[BaseStore] = config.get("configurable", {}).get("store")
+    if not store:
+        return "Memory not available - store not configured."
+    namespace: tuple[str, str] = ("user_memories", user_id.replace(".", "-"))
     results = await store.asearch(namespace, query=query, limit=5)
-    return format_results(results)
+    if not results:
+        return "No memories found for this user."
+    memory_items: list[str] = [f"- [{item.key}]: {json.dumps(item.value)}" for item in results]
+    return f"Found {len(results)} relevant memories:\n" + "\n".join(memory_items)
 
 @tool
 async def save_user_memory(memory_key: str, memory_data_json: str, config: RunnableConfig) -> str:
     """Save information about the user to long-term memory."""
-    user_id = config.get("configurable", {}).get("user_id")
-    store = config.get("configurable", {}).get("store")
-    namespace = ("user_memories", user_id)
-    await store.aput(namespace, memory_key, json.loads(memory_data_json))
-    return f"Saved memory '{memory_key}'"
+    user_id: Optional[str] = config.get("configurable", {}).get("user_id")
+    if not user_id:
+        return "Cannot save memory - no user_id provided."
+    store: Optional[BaseStore] = config.get("configurable", {}).get("store")
+    if not store:
+        return "Cannot save memory - store not configured."
+    namespace: tuple[str, str] = ("user_memories", user_id.replace(".", "-"))
+    memory_data: dict = json.loads(memory_data_json)
+    await store.aput(namespace, memory_key, memory_data)
+    return f"Successfully saved memory '{memory_key}' for user."
 
 @tool
 async def delete_user_memory(memory_key: str, config: RunnableConfig) -> str:
     """Delete a specific memory from the user's long-term memory."""
-    store = config.get("configurable", {}).get("store")
-    namespace = ("user_memories", user_id)
+    user_id: Optional[str] = config.get("configurable", {}).get("user_id")
+    if not user_id:
+        return "Cannot delete memory - no user_id provided."
+    store: Optional[BaseStore] = config.get("configurable", {}).get("store")
+    if not store:
+        return "Cannot delete memory - store not configured."
+    namespace: tuple[str, str] = ("user_memories", user_id.replace(".", "-"))
     await store.adelete(namespace, memory_key)
-    return f"Deleted memory '{memory_key}'"
+    return f"Successfully deleted memory '{memory_key}' for user."
 ```
 
 The `AsyncDatabricksStore` uses **semantic search** -- when the agent calls `get_user_memory("programming language preference")`, it finds relevant memories even if they were stored with different wording.
 
 ### Key Code: `agent.py` with Long-Term Memory
 
-The agent is initialized with a store and includes memory tools:
+The agent is initialized with a store and includes memory tools. Note this is the same `init_agent()` shown in Part A -- it accepts both `checkpointer` and `store`:
 
 ```python
 from databricks_langchain import AsyncDatabricksStore
 
-async def init_agent(store):
-    tools = [get_current_time, calculate] + memory_tools()
+async def init_agent(
+    checkpointer: Optional[Any] = None,
+    store: Optional[BaseStore] = None,
+) -> CompiledStateGraph:
+    tools: list = [get_current_time, calculate] + memory_tools()
+    model: ChatDatabricks = ChatDatabricks(endpoint=LLM_ENDPOINT_NAME)
     return create_agent(
-        model=ChatDatabricks(endpoint="databricks-claude-sonnet-4-5"),
+        model=model,
         tools=tools,
         system_prompt=SYSTEM_PROMPT,
+        checkpointer=checkpointer,
         store=store,
+        state_schema=StatefulAgentState,
     )
 ```
 
-The stream handler creates the store and passes the user ID:
+The stream handler creates both memory backends and passes the user ID via config. The actual code in `agent.py` nests both `AsyncCheckpointSaver` (short-term) and `AsyncDatabricksStore` (long-term) -- here we show the long-term store portion:
 
 ```python
 @stream()
-async def stream_handler(request):
-    user_id = get_user_id(request)
+async def stream_handler(
+    request: ResponsesAgentRequest,
+) -> AsyncGenerator[ResponsesAgentStreamEvent, None]:
+    user_id: Optional[str] = get_user_id(request)
 
     async with AsyncDatabricksStore(
         instance_name=LAKEBASE_INSTANCE_NAME,
-        embedding_endpoint="databricks-gte-large-en",
-        embedding_dims=1024,
+        embedding_endpoint=EMBEDDING_ENDPOINT,
+        embedding_dims=EMBEDDING_DIMS,
     ) as store:
         await store.setup()
-        config = {"configurable": {"store": store, "user_id": user_id}}
-        agent = await init_agent(store=store)
+        config: dict[str, Any] = {"configurable": {"store": store}}
+        if user_id:
+            config["configurable"]["user_id"] = user_id
+        agent: CompiledStateGraph = await init_agent(store=store)
 
         async for event in process_agent_astream_events(
             agent.astream(messages, config, stream_mode=["updates", "messages"])

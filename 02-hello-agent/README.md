@@ -117,13 +117,19 @@ This is the file you'll modify most. Let's walk through it:
 # 1. Define tools as simple Python functions with the @tool decorator
 @tool
 def get_current_time() -> str:
-    """Get the current date and time."""
+    """Get the current date and time. Use this when the user asks what time it is or what today's date is."""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 @tool
 def calculate(expression: str) -> str:
-    """Evaluate a mathematical expression. Example: '2 + 2' or '15 * 3.14'"""
-    result = eval(expression)  # Safe for demo purposes
+    """Evaluate a mathematical expression and return the result.
+
+    Args:
+        expression: A mathematical expression to evaluate. Examples: '2 + 2', '15 * 3.14'
+    """
+    # Restrict eval to safe math builtins only
+    allowed_names: dict[str, object] = {"abs": abs, "round": round, "min": min, "max": max, "pow": pow}
+    result: object = eval(expression, {"__builtins__": {}}, allowed_names)
     return str(result)
 ```
 
@@ -131,19 +137,22 @@ The `@tool` decorator from LangChain turns any Python function into a tool the a
 
 ```python
 # 2. Create the agent with tools and model
-def create_langchain_agent(tools, model):
-    return create_agent(tools=tools, model=model)
+TOOLS: list = [get_current_time, calculate]
+MODEL: ChatDatabricks = ChatDatabricks(endpoint="databricks-claude-sonnet-4-5")
+
+def init_agent() -> CompiledStateGraph:
+    return create_agent(tools=TOOLS, model=MODEL)
 ```
 
 ```python
 # 3. Register handlers with MLflow AgentServer
 @invoke()
-async def non_streaming(request):
+async def non_streaming(request: ResponsesAgentRequest) -> ResponsesAgentResponse:
     # Handles non-streaming requests
     ...
 
 @stream()
-async def streaming(request):
+async def streaming(request: ResponsesAgentRequest) -> AsyncGenerator[ResponsesAgentStreamEvent, None]:
     # Handles streaming requests - yields events in real time
     ...
 ```

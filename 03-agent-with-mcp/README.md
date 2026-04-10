@@ -65,8 +65,8 @@ This package lets LangChain agents use tools from MCP servers.
 ```python
 from databricks_langchain import DatabricksMCPServer, DatabricksMultiServerMCPClient
 
-def init_mcp_client() -> DatabricksMultiServerMCPClient:
-    host_name = get_databricks_host_from_env()
+def init_mcp_client(workspace_client: WorkspaceClient) -> DatabricksMultiServerMCPClient:
+    host_name: Optional[str] = get_databricks_host_from_env()
     return DatabricksMultiServerMCPClient([
         DatabricksMCPServer(
             name="system-ai",
@@ -78,10 +78,12 @@ def init_mcp_client() -> DatabricksMultiServerMCPClient:
 ### 3. Tools are loaded dynamically from MCP + custom tools
 
 ```python
-async def init_agent():
-    mcp_client = init_mcp_client()
-    mcp_tools = await mcp_client.get_tools()
-    all_tools = CUSTOM_TOOLS + mcp_tools  # Combine custom + MCP tools
+async def init_agent(workspace_client: Optional[WorkspaceClient] = None) -> CompiledStateGraph:
+    mcp_client: DatabricksMultiServerMCPClient = init_mcp_client(
+        workspace_client or sp_workspace_client
+    )
+    mcp_tools: list = await mcp_client.get_tools()
+    all_tools: list = CUSTOM_TOOLS + mcp_tools  # Combine custom + MCP tools
     return create_agent(tools=all_tools, model=MODEL)
 ```
 
