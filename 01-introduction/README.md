@@ -17,37 +17,25 @@ This is the recommended approach for building and deploying agents on Databricks
 
 ```mermaid
 graph TB
-    subgraph APP["Databricks App"]
-        UI["Chat UI<br/><i>Next.js on port 8000</i>"]
-        subgraph SERVER["MLflow AgentServer (FastAPI)"]
-            EP["/invocations endpoint"]
-            subgraph AGENT["Your Agent Code"]
-                INV["@invoke()"]
-                STR["@stream()"]
-            end
-        end
-    end
+    UI["🖥️ Chat UI — Next.js"]
+    SERVER["⚡ MLflow AgentServer — FastAPI /invocations"]
+    AGENT["🤖 Your Agent — @invoke( ) · @stream( )"]
 
-    UI -->|HTTP POST| EP
-    EP --> INV
-    EP --> STR
+    UI -- "HTTP POST" --> SERVER
+    SERVER --> AGENT
 
-    AGENT -->|ChatDatabricks| LLM["LLM Endpoint<br/><i>Claude, GPT, etc.</i>"]
-    AGENT -->|DatabricksMCPClient| MCP["MCP Servers<br/><i>SQL, Genie, UC Functions</i>"]
-    AGENT -->|Direct call| TOOLS["Custom Tools<br/><i>@tool functions</i>"]
-    AGENT -->|Auto-trace| MLFLOW["MLflow<br/><i>Traces & Experiments</i>"]
+    AGENT -- "ChatDatabricks" --> LLM["🧠 LLM Endpoint"]
+    AGENT -- "MCP Client" --> MCP["🔌 MCP Servers"]
+    AGENT -- "Direct call" --> TOOLS["🔧 Custom @tool"]
+    AGENT -. "Auto-trace" .-> MLFLOW["📊 MLflow"]
 
-    style APP fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
-    style SERVER fill:#1B5162,stroke:#FF3621,stroke-width:1px,color:#fff
-    style AGENT fill:#0B2026,stroke:#618693,stroke-width:1px,color:#fff
-    style UI fill:#FF3621,stroke:#FF3621,color:#fff
-    style EP fill:#1B5162,stroke:#618693,color:#fff
-    style INV fill:#00A972,stroke:#00A972,color:#fff
-    style STR fill:#00A972,stroke:#00A972,color:#fff
-    style LLM fill:#4259FE,stroke:#4259FE,color:#fff
-    style MCP fill:#FEAB03,stroke:#FEAB03,color:#0B2026
-    style TOOLS fill:#970F29,stroke:#970F29,color:#fff
-    style MLFLOW fill:#618693,stroke:#618693,color:#fff
+    style UI fill:#FF3621,stroke:#c42a1a,color:#fff
+    style SERVER fill:#1B5162,stroke:#0d3a48,color:#fff
+    style AGENT fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
+    style LLM fill:#4259FE,stroke:#2f44d4,color:#fff
+    style MCP fill:#FEAB03,stroke:#c98a02,color:#0B2026
+    style TOOLS fill:#970F29,stroke:#6e0b1e,color:#fff
+    style MLFLOW fill:#618693,stroke:#4a6a75,color:#fff
 ```
 
 ## Key Components
@@ -182,31 +170,24 @@ app = agent_server.app
 When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical. See the [Agent Framework authentication docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) and the [Databricks Apps auth docs](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) for the full reference.
 
 ```mermaid
-graph LR
-    subgraph SP_AUTH["Service Principal Auth"]
-        direction TB
-        U1["Any User"] --> APP1["Databricks App"]
-        APP1 -->|"SP credentials<br/>(auto-injected)"| RES1["Databricks Resources"]
-        note1["All users share<br/>same permissions"]
+graph TD
+    subgraph SP["① Service Principal Auth"]
+        U1["Any User"] --> APP1["App uses SP credentials"]
+        APP1 --> RES1["Resources — shared permissions"]
+    end
+    subgraph OBO["② User API Scopes — OBO"]
+        U2["Logged-in User"] -- "OAuth token" --> APP2["App forwards user token"]
+        APP2 --> RES2["Resources — user's own permissions"]
     end
 
-    subgraph OBO_AUTH["User API Scopes (OBO)"]
-        direction TB
-        U2["Logged-in User"] -->|"OAuth login"| APP2["Databricks App"]
-        APP2 -->|"x-forwarded-access-token<br/>(user's identity)"| RES2["Databricks Resources"]
-        note2["Each user's own<br/>permissions enforced"]
-    end
-
-    style SP_AUTH fill:#1B3139,stroke:#4259FE,stroke-width:2px,color:#fff
-    style OBO_AUTH fill:#1B3139,stroke:#00A972,stroke-width:2px,color:#fff
-    style U1 fill:#618693,stroke:#618693,color:#fff
-    style U2 fill:#618693,stroke:#618693,color:#fff
-    style APP1 fill:#4259FE,stroke:#4259FE,color:#fff
-    style APP2 fill:#00A972,stroke:#00A972,color:#fff
-    style RES1 fill:#1B5162,stroke:#618693,color:#fff
-    style RES2 fill:#1B5162,stroke:#618693,color:#fff
-    style note1 fill:none,stroke:none,color:#618693
-    style note2 fill:none,stroke:none,color:#618693
+    style SP fill:#0d1f26,stroke:#4259FE,stroke-width:2px,color:#fff
+    style OBO fill:#0d1f26,stroke:#00A972,stroke-width:2px,color:#fff
+    style U1 fill:#618693,stroke:#4a6a75,color:#fff
+    style U2 fill:#618693,stroke:#4a6a75,color:#fff
+    style APP1 fill:#4259FE,stroke:#2f44d4,color:#fff
+    style APP2 fill:#00A972,stroke:#008a5c,color:#fff
+    style RES1 fill:#1B5162,stroke:#0d3a48,color:#fff
+    style RES2 fill:#1B5162,stroke:#0d3a48,color:#fff
 ```
 
 ### App Service Principal (Resource Auth)
@@ -305,21 +286,22 @@ user_client = get_user_workspace_client()
 Most production agents use **both** approaches. The service principal handles shared resources while OBO handles user-specific data:
 
 ```mermaid
-graph TB
-    USER["Logged-in User"] --> APP["Databricks App<br/><i>Your Agent</i>"]
+graph LR
+    USER["👤 User"] --> APP["🤖 Agent App"]
+    APP -- "SP auth" --> LLM["🧠 LLM Endpoint"]
+    APP -- "SP auth" --> MLF["📊 MLflow"]
+    APP -- "User token" --> SQL["🗄️ SQL Warehouse"]
+    APP -- "User token" --> UC["📋 UC Tables"]
 
-    APP -->|"SP credentials<br/>(automatic)"| LLM["LLM Endpoint<br/><b>CAN_QUERY</b>"]
-    APP -->|"SP credentials<br/>(automatic)"| MLF["MLflow Experiment<br/><b>CAN_MANAGE</b>"]
-    APP -->|"User's OAuth token<br/>(x-forwarded-access-token)"| SQL["SQL Warehouse<br/><b>User's permissions</b>"]
-    APP -->|"User's OAuth token<br/>(x-forwarded-access-token)"| UC["Unity Catalog Tables<br/><b>Row/column filters applied</b>"]
-
-    style USER fill:#618693,stroke:#618693,color:#fff
-    style APP fill:#FF3621,stroke:#FF3621,color:#fff
-    style LLM fill:#4259FE,stroke:#4259FE,color:#fff
-    style MLF fill:#4259FE,stroke:#4259FE,color:#fff
-    style SQL fill:#00A972,stroke:#00A972,color:#fff
-    style UC fill:#00A972,stroke:#00A972,color:#fff
+    style USER fill:#618693,stroke:#4a6a75,color:#fff
+    style APP fill:#FF3621,stroke:#c42a1a,color:#fff
+    style LLM fill:#4259FE,stroke:#2f44d4,color:#fff
+    style MLF fill:#4259FE,stroke:#2f44d4,color:#fff
+    style SQL fill:#00A972,stroke:#008a5c,color:#fff
+    style UC fill:#00A972,stroke:#008a5c,color:#fff
 ```
+
+> **Blue nodes** = Service Principal auth (shared). **Green nodes** = User token / OBO (per-user permissions).
 
 ```python
 # SP auth for shared resources (LLM, MLflow)
@@ -374,30 +356,21 @@ def get_user_workspace_client() -> WorkspaceClient:
 
 ```mermaid
 graph LR
-    subgraph DEV["Local Development"]
-        AUTH["databricks auth login"] --> ENV["Configure .env.local"]
-        ENV --> SYNC["uv sync"]
-        SYNC --> RUN["uv run start-app"]
-        RUN --> TEST["Test at localhost:8000"]
-        TEST -->|"Edit agent.py"| RUN
-    end
+    A["1. databricks auth login"] --> B["2. Configure .env.local"]
+    B --> C["3. uv sync"]
+    C --> D["4. uv run start-app"]
+    D --> E["5. Test at localhost:8000"]
+    E -- "Edit agent.py" --> D
+    E -- "Ready to ship" --> F["6. databricks bundle deploy"]
+    F --> G["✅ Live on *.databricksapps.com"]
 
-    subgraph DEPLOY["Deploy to Databricks"]
-        BUNDLE["databricks bundle deploy"]
-        BUNDLE --> LIVE["App is live at<br/>*.databricksapps.com"]
-    end
-
-    TEST -->|"Ready to ship"| BUNDLE
-
-    style DEV fill:#1B3139,stroke:#00A972,stroke-width:2px,color:#fff
-    style DEPLOY fill:#1B3139,stroke:#4259FE,stroke-width:2px,color:#fff
-    style AUTH fill:#618693,stroke:#618693,color:#fff
-    style ENV fill:#618693,stroke:#618693,color:#fff
-    style SYNC fill:#618693,stroke:#618693,color:#fff
-    style RUN fill:#00A972,stroke:#00A972,color:#fff
-    style TEST fill:#FF3621,stroke:#FF3621,color:#fff
-    style BUNDLE fill:#4259FE,stroke:#4259FE,color:#fff
-    style LIVE fill:#00A972,stroke:#00A972,color:#fff
+    style A fill:#618693,stroke:#4a6a75,color:#fff
+    style B fill:#618693,stroke:#4a6a75,color:#fff
+    style C fill:#618693,stroke:#4a6a75,color:#fff
+    style D fill:#00A972,stroke:#008a5c,color:#fff
+    style E fill:#FF3621,stroke:#c42a1a,color:#fff
+    style F fill:#4259FE,stroke:#2f44d4,color:#fff
+    style G fill:#00A972,stroke:#008a5c,color:#fff
 ```
 
 ### Local Development
