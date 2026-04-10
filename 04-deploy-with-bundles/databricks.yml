@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://json.schemastore.org/databricks-asset-bundles.json
+# Databricks Asset Bundle for the Agents on Apps Workshop
+
+bundle:
+  name: agents-workshop-mcp
+
+variables:
+  resource_name_suffix:
+    description: "Suffix for resource names to avoid collisions between users"
+
+resources:
+  # MLflow Experiment for agent tracing and evaluation
+  experiments:
+    agent_experiment:
+      name: /Users/${workspace.current_user.userName}/agents-workshop-mcp
+      permissions:
+        - level: CAN_MANAGE
+          group_name: users
+
+  # The Databricks App
+  apps:
+    agent_app:
+      name: agents-workshop-${var.resource_name_suffix}
+      description: "Workshop agent with custom tools and MCP server integration"
+      source_code_path: .
+
+      # App runtime configuration (replaces app.yaml)
+      config:
+        command:
+          - uv
+          - run
+          - start-app
+        env:
+          - name: MLFLOW_TRACKING_URI
+            value: "databricks"
+          - name: MLFLOW_REGISTRY_URI
+            value: "databricks-uc"
+          - name: API_PROXY
+            value: "http://localhost:8000/invocations"
+          - name: CHAT_APP_PORT
+            value: "3000"
+          - name: CHAT_PROXY_TIMEOUT_SECONDS
+            value: "300"
+
+      # Resources the app's service principal needs access to
+      resources:
+        - name: experiment
+          description: "MLflow experiment for tracing agent interactions"
+          experiment:
+            experiment_name: ${resources.experiments.agent_experiment.name}
+            permission: CAN_MANAGE
+        - name: llm
+          description: "Foundation model endpoint for the agent"
+          serving_endpoint:
+            name: databricks-claude-sonnet-4
+            permission: CAN_QUERY
+
+      # Who can access the deployed app
+      permissions:
+        - level: CAN_USE
+          group_name: users
+
+# Sync configuration - controls which files are uploaded to the workspace
+sync:
+  include:
+    - "agent_server/**"
+    - "scripts/**"
+    - "pyproject.toml"
+  exclude:
+    - ".venv/**"
+    - "__pycache__/**"
+    - "*.pyc"
+    - ".git/**"
+    - ".databricks/**"
+    - "e2e-chatbot-app-next/**"
+    - "temp-app-templates/**"
+    - "backend.log"
+    - "frontend.log"
+    - ".env.local"
+    - ".env.example"
+
+# Deployment targets
+targets:
+  dev:
+    mode: development
+    default: true
+    variables:
+      resource_name_suffix: dev-${workspace.current_user.domain_friendly_name}
+
+  staging:
+    mode: production
+    variables:
+      resource_name_suffix: "staging"
+
+  prod:
+    mode: production
+    variables:
+      resource_name_suffix: "prod"

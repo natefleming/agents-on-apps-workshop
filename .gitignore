@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Environment
+.env.local
+.env
+
+# uv
+uv.lock
+
+# Node / Chat UI
+e2e-chatbot-app-next/
+temp-app-templates/
+node_modules/
+
+# Logs
+backend.log
+frontend.log
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Databricks
+.databricks/
+
+# OS
+.DS_Store
+Thumbs.db
