@@ -1,5 +1,7 @@
 # Chapter 1: Introduction to Agents on Apps
 
+> **[Open the Workshop Presentation](../docs/agents-on-apps-workshop.html)** -- Interactive slide deck to follow along with this workshop.
+
 ## What is an "Agent on an App"?
 
 An **Agent on an App** is an AI agent deployed as a Databricks App. Instead of deploying your agent behind a Model Serving endpoint, you deploy it as a full application that:
