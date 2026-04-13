@@ -234,7 +234,7 @@ If you're running with `--reload`, the server will restart automatically. Try: *
 
 There are three ways to deploy your agent. Choose the one that fits your workflow.
 
-> **App Source Options:** All deployment methods support two source types -- a **workspace directory** (sync code to `/Workspace/Users/...`) or a **Git repository** (deploy directly from a branch, tag, or commit). Configure the git repo at app creation with `git_repository: {url, provider}`, then deploy with `git_source: {branch, source_code_path}`. See the [presentation](../docs/agents-on-apps-workshop.html) for full syntax examples.
+> **App Source Options:** All deployment methods support two source types -- a **workspace directory** (sync code to `/Workspace/Users/...`) or a **Git repository** (deploy directly from a branch, tag, or commit). Configure the git repo at app creation with `git_repository: {url, provider}`, then deploy with `git_source: {branch}`. The `source_code_path` field is optional and defaults to the repo root. See the [presentation](../docs/agents-on-apps-workshop.html) for full syntax examples.
 
 ### Option A: Deploy from Workspace UI
 

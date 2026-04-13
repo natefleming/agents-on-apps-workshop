@@ -593,13 +593,19 @@ w.apps.<span class="func">deploy</span>(app_name=<span class="string">"my-agent"
         <div>
           <h3 style="color: white; margin-bottom: 0.75rem;"><span class="tag tag-green">Git Repository</span></h3>
           <p style="color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-bottom: 1rem;">Deploy directly from a branch, tag, or commit. No sync needed.</p>
-          <div class="code-block" style="font-size: 0.7rem; padding: 1rem; line-height: 1.5;"><span class="comment"># CLI (pass git source as JSON)</span>
+          <div class="code-block" style="font-size: 0.7rem; padding: 1rem; line-height: 1.5;"><span class="comment"># 1. Create app with git repo (one-time)</span>
+databricks apps create --json <span class="string">'{
+  "name": "my-agent",
+  "git_repository": {
+    "url": "https://github.com/org/repo",
+    "provider": "gitHub"
+  }
+}'</span>
+
+<span class="comment"># 2. Deploy (inherits git_repository from app)</span>
+<span class="comment">#    source_code_path is optional (defaults to repo root)</span>
 databricks apps deploy my-agent --json <span class="string">'{
   "git_source": {
-    "git_repository": {
-      "url": "https://github.com/org/repo",
-      "provider": "gitHub"
-    },
     "branch": "main",
     "source_code_path": "./apps/my-agent"
   }
@@ -614,17 +620,7 @@ databricks apps deploy my-agent --json <span class="string">'{
         <span class="type">provider</span>: <span class="string">gitHub</span>
       <span class="type">git_source</span>:
         <span class="type">branch</span>: <span class="string">main</span>
-        <span class="type">source_code_path</span>: <span class="string">./apps/my-agent</span>
-
-<span class="comment"># SDK</span>
-w.apps.<span class="func">deploy</span>(app_name=<span class="string">"my-agent"</span>,
-    app_deployment=<span class="type">AppDeployment</span>(
-        git_source=<span class="type">GitSource</span>(
-            git_repository=<span class="type">GitRepository</span>(
-                url=<span class="string">"https://github.com/org/repo"</span>,
-                provider=<span class="string">"gitHub"</span>),
-            branch=<span class="string">"main"</span>,
-            source_code_path=<span class="string">"./apps/my-agent"</span>)))</div>
+        <span class="type">source_code_path</span>: <span class="string">./apps/my-agent</span> <span class="comment"># optional</span></div>
         </div>
       </div>
       <div style="margin-top: 1.25rem; display: flex; justify-content: center; gap: 2rem;">

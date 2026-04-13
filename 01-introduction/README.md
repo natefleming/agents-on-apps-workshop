@@ -356,7 +356,7 @@ curl -X POST http://localhost:8000/invocations \
 
 This workshop covers three ways to deploy your agent to Databricks Apps. Each method is demonstrated in the chapter deployment steps.
 
-> **App Source Options:** Databricks Apps can be deployed from a **workspace directory** (sync code to `/Workspace/Users/...`) or directly from a **Git repository** (deploy from a branch, tag, or commit SHA). Configure the git repo at app creation with `git_repository: {url, provider}`, then deploy with `git_source: {branch, source_code_path}`. Supported providers include GitHub, GitLab, Azure DevOps, Bitbucket, and AWS CodeCommit.
+> **App Source Options:** Databricks Apps can be deployed from a **workspace directory** (sync code to `/Workspace/Users/...`) or directly from a **Git repository** (deploy from a branch, tag, or commit SHA). Configure the git repo at app creation with `git_repository: {url, provider}`, then deploy with `git_source: {branch}`. The `source_code_path` field is optional and defaults to the repo root. Supported providers include GitHub, GitLab, Azure DevOps, Bitbucket, and AWS CodeCommit.
 
 ### 1. Deploy from Workspace UI
 

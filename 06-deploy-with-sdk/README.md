@@ -83,6 +83,8 @@ deployment = w.apps.deploy_and_wait(
 )
 
 # Option 2: Deploy from a Git repository
+# git_repository can also be set at app creation time and inherited here.
+# source_code_path is optional -- defaults to the repo root if omitted.
 deployment = w.apps.deploy_and_wait(
     app_name="my-agent",
     app_deployment=AppDeployment(
@@ -91,7 +93,7 @@ deployment = w.apps.deploy_and_wait(
                 url="https://github.com/org/repo",
                 provider="gitHub",
             ),
-            branch="main",
+            branch="main",  # or tag= / commit=
             source_code_path="./apps/my-agent",
         ),
     ),

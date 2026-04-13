@@ -199,11 +199,11 @@ resources:
         url: https://github.com/org/repo
         provider: gitHub
       git_source:
-        branch: main
-        source_code_path: ./03-agent-with-mcp
+        branch: main                          # or tag: / commit:
+        source_code_path: ./03-agent-with-mcp # optional, defaults to repo root
 ```
 
-Supported providers: `gitHub`, `gitLab`, `azureDevOpsServices`, `bitbucketCloud`, `awsCodeCommit`. You can also reference a `tag` or `commit` instead of `branch`.
+Supported providers: `gitHub`, `gitLab`, `azureDevOpsServices`, `bitbucketCloud`, `awsCodeCommit`. You can reference a `branch`, `tag`, or `commit` SHA. The `source_code_path` is optional -- if omitted, the root of the repository is used.
 
 ### `targets:` - Multi-Environment Deployment
 
