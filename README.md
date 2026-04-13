@@ -2,8 +2,6 @@
 
 Build, test, and deploy AI agents on Databricks Apps. This workshop takes you from zero to a fully deployed agent with tools and MCP server integration.
 
-<sub>[Slide Deck](./docs/agents-on-apps-workshop.html) -- open in browser to present</sub>
-
 ## What You'll Learn
 
 - How Databricks Apps provides a local-first development experience for AI agents
