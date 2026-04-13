@@ -324,45 +324,42 @@
             </div>
             <div class="timeline-item">
               <h4>2. Add Resources</h4>
-              <p>Click <strong>Add Resource</strong> for each dependency:</p>
+              <p>Click <strong>Add Resource</strong> for each dependency. The app&rsquo;s SP gets permissions automatically.</p>
             </div>
             <div class="timeline-item">
-              <h4>3. Configure Env Vars</h4>
-              <p>Add <span class="inline-code">LAKEBASE_INSTANCE_NAME</span> or other app-specific variables.</p>
-            </div>
-            <div class="timeline-item">
-              <h4>4. Deploy</h4>
+              <h4>3. Deploy</h4>
               <p>Upload source code and click <strong>Deploy</strong>. The UI creates a service principal automatically.</p>
             </div>
           </div>
         </div>
         <div>
-          <h3 style="margin-bottom: 1rem;">Resources to Add</h3>
-          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+          <h3 style="margin-bottom: 0.75rem;">Resources to Add</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">All chapters need these two:</p>
+          <div class="card" style="margin-bottom: 0.5rem; padding: 0.85rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="tag tag-teal">Experiment</span>
               <span>MLflow experiment &rarr; <span class="inline-code">CAN_MANAGE</span></span>
             </div>
           </div>
-          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+          <div class="card" style="margin-bottom: 0.75rem; padding: 0.85rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="tag tag-lava">Endpoint</span>
               <span><span class="inline-code">databricks-claude-sonnet-4-5</span> &rarr; <span class="inline-code">CAN_QUERY</span></span>
             </div>
           </div>
-          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Ch 5 (Memory) also needs:</p>
+          <div class="card" style="margin-bottom: 0.5rem; padding: 0.85rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="tag tag-green">Database</span>
               <span>Lakebase &rarr; <span class="inline-code">CAN_CONNECT_AND_CREATE</span></span>
             </div>
           </div>
-          <div class="card" style="padding: 1rem;">
+          <div class="card" style="padding: 0.85rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <span class="tag tag-amber">Endpoint</span>
               <span><span class="inline-code">databricks-gte-large-en</span> &rarr; <span class="inline-code">CAN_QUERY</span></span>
             </div>
           </div>
-          <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Resource list varies by chapter. Ch 2-4 need only the experiment and LLM endpoint.</p>
         </div>
       </div>
     </div>
