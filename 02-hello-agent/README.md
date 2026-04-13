@@ -11,22 +11,6 @@ An agent that has access to two custom tools:
 
 These are simple tools, but they demonstrate the core pattern: your agent decides *when* to call a tool based on the user's message, calls it, and incorporates the result into its response.
 
-<!-- Mermaid source for Agent Tool Calling Sequence (re-render: mmdc -i input.mmd -o 02-tool-calling.svg -t neutral -b transparent)
-sequenceDiagram
-    participant U as User
-    participant A as Agent (LangGraph)
-    participant L as LLM (Claude)
-    participant T as Tools
-
-    U->>A: "What is 42 * 17?"
-    A->>L: User message + tool descriptions
-    L-->>A: Call calculate("42 * 17")
-    A->>T: calculate("42 * 17")
-    T-->>A: "714"
-    A->>L: Tool result: "714"
-    L-->>A: "42 * 17 = 714"
-    A->>U: "42 multiplied by 17 equals 714."
--->
 <p align="center">
   <img src="../docs/diagrams/02-tool-calling.svg" alt="Agent Tool Calling Sequence">
 </p>
@@ -84,33 +68,6 @@ MLFLOW_EXPERIMENT_ID=1234567890     # from the step above
 
 ## Step 2: Understand the Code
 
-<!-- Mermaid source for Project File Structure (re-render: mmdc -i input.mmd -o 02-project-structure.svg -t neutral -b transparent)
-graph LR
-    subgraph FILES["Project Structure"]
-        direction TB
-        AY["app.yaml<br/><i>Deployment config</i>"]
-        PT["pyproject.toml<br/><i>Dependencies & scripts</i>"]
-        ENV[".env.local<br/><i>Local environment</i>"]
-        AG["agent_server/agent.py<br/><i>Your agent logic</i>"]
-        SS["agent_server/start_server.py<br/><i>Server bootstrap</i>"]
-        UT["agent_server/utils.py<br/><i>Stream helpers</i>"]
-    end
-
-    AG -->|"you edit this"| WHAT["Define model,<br/>tools, handlers"]
-    SS -->|"rarely touch"| BOOT["AgentServer init,<br/>import agent"]
-    PT -->|"uv add pkg"| DEPS["Manage<br/>dependencies"]
-
-    style FILES fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
-    style AG fill:#FF3621,stroke:#FF3621,color:#fff
-    style SS fill:#1B5162,stroke:#618693,color:#fff
-    style UT fill:#1B5162,stroke:#618693,color:#fff
-    style AY fill:#1B5162,stroke:#618693,color:#fff
-    style PT fill:#1B5162,stroke:#618693,color:#fff
-    style ENV fill:#618693,stroke:#618693,color:#fff
-    style WHAT fill:#00A972,stroke:#00A972,color:#fff
-    style BOOT fill:#618693,stroke:#618693,color:#fff
-    style DEPS fill:#618693,stroke:#618693,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/02-project-structure.svg" alt="Project File Structure">
 </p>

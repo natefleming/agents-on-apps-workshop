@@ -6,27 +6,6 @@ In this chapter, you'll extend your agent with **MCP (Model Context Protocol)** 
 
 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) is an open protocol that standardizes how AI agents discover and use tools. Think of it like a USB port for AI tools -- any MCP-compatible server can plug into any MCP-compatible agent.
 
-<!-- Mermaid source for MCP Server Architecture (re-render: mmdc -i input.mmd -o 03-mcp-architecture.svg -t neutral -b transparent)
-graph LR
-    AGENT["Your Agent<br/><i>LangGraph</i>"] -->|"get_tools()"| CLIENT["DatabricksMulti<br/>ServerMCPClient"]
-
-    CLIENT --> MCP1["UC Functions MCP<br/><i>/api/2.0/mcp/functions/system/ai</i>"]
-    CLIENT --> MCP2["SQL MCP<br/><i>/api/2.0/mcp/sql</i>"]
-    CLIENT --> MCP3["Vector Search MCP<br/><i>/api/2.0/mcp/vector-search/...</i>"]
-
-    MCP1 -->|"python_exec"| T1["Code Interpreter"]
-    MCP2 -->|"execute_sql"| T2["SQL Warehouse"]
-    MCP3 -->|"search"| T3["Vector Index"]
-
-    style AGENT fill:#FF3621,stroke:#FF3621,color:#fff
-    style CLIENT fill:#1B5162,stroke:#618693,color:#fff
-    style MCP1 fill:#00A972,stroke:#00A972,color:#fff
-    style MCP2 fill:#4259FE,stroke:#4259FE,color:#fff
-    style MCP3 fill:#FEAB03,stroke:#FEAB03,color:#0B2026
-    style T1 fill:#1B3139,stroke:#618693,color:#fff
-    style T2 fill:#1B3139,stroke:#618693,color:#fff
-    style T3 fill:#1B3139,stroke:#618693,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/03-mcp-architecture.svg" alt="MCP Server Architecture">
 </p>
@@ -133,30 +112,6 @@ When a user sends a message, the LLM sees descriptions of ALL available tools (b
 - **What time is it?** Use the `get_current_time` custom tool
 - **Complex analysis, data manipulation, or code?** Use `python_exec` from the MCP server
 
-<!-- Mermaid source for Agent Tool Selection (re-render: mmdc -i input.mmd -o 03-tool-selection.svg -t neutral -b transparent)
-flowchart TD
-    MSG["User Message"] --> LLM{"LLM Analyzes<br/>Intent"}
-
-    LLM -->|"What time is it?"| CT1["get_current_time<br/><i>Custom Tool</i>"]
-    LLM -->|"What is 2+2?"| CT2["calculate<br/><i>Custom Tool</i>"]
-    LLM -->|"Plot a chart of..."| MCP["python_exec<br/><i>MCP Tool</i>"]
-    LLM -->|"Tell me a joke"| DIRECT["Direct LLM Response<br/><i>No tool needed</i>"]
-
-    CT1 --> RESULT["Combine result<br/>into response"]
-    CT2 --> RESULT
-    MCP --> RESULT
-    DIRECT --> RESULT
-    RESULT --> USER["User sees response"]
-
-    style MSG fill:#618693,stroke:#618693,color:#fff
-    style LLM fill:#FF3621,stroke:#FF3621,color:#fff
-    style CT1 fill:#970F29,stroke:#970F29,color:#fff
-    style CT2 fill:#970F29,stroke:#970F29,color:#fff
-    style MCP fill:#00A972,stroke:#00A972,color:#fff
-    style DIRECT fill:#4259FE,stroke:#4259FE,color:#fff
-    style RESULT fill:#1B5162,stroke:#618693,color:#fff
-    style USER fill:#1B3139,stroke:#618693,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/03-tool-selection.svg" alt="Agent Tool Selection">
 </p>

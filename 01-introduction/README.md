@@ -17,28 +17,6 @@ This is the recommended approach for building and deploying agents on Databricks
 
 ## Architecture Overview
 
-<!-- Mermaid source for Architecture Overview (re-render: mmdc -i input.mmd -o 01-architecture.svg -t neutral -b transparent)
-graph TB
-    UI["🖥️ Chat UI — Next.js"]
-    SERVER["⚡ MLflow AgentServer — FastAPI /invocations"]
-    AGENT["🤖 Your Agent — @invoke( ) · @stream( )"]
-
-    UI -- "HTTP POST" --> SERVER
-    SERVER --> AGENT
-
-    AGENT -- "ChatDatabricks" --> LLM["🧠 LLM Endpoint"]
-    AGENT -- "MCP Client" --> MCP["🔌 MCP Servers"]
-    AGENT -- "Direct call" --> TOOLS["🔧 Custom @tool"]
-    AGENT -. "Auto-trace" .-> MLFLOW["📊 MLflow"]
-
-    style UI fill:#FF3621,stroke:#c42a1a,color:#fff
-    style SERVER fill:#1B5162,stroke:#0d3a48,color:#fff
-    style AGENT fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
-    style LLM fill:#4259FE,stroke:#2f44d4,color:#fff
-    style MCP fill:#FEAB03,stroke:#c98a02,color:#0B2026
-    style TOOLS fill:#970F29,stroke:#6e0b1e,color:#fff
-    style MLFLOW fill:#618693,stroke:#4a6a75,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/01-architecture.svg" alt="Architecture Overview">
 </p>
@@ -179,26 +157,6 @@ app = agent_server.app
 
 When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical. See the [Agent Framework authentication docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) and the [Databricks Apps auth docs](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) for the full reference.
 
-<!-- Mermaid source for SP vs OBO Authentication (re-render: mmdc -i input.mmd -o 01-auth-comparison.svg -t neutral -b transparent)
-graph TD
-    subgraph SP["① Service Principal Auth"]
-        U1["Any User"] --> APP1["App uses SP credentials"]
-        APP1 --> RES1["Resources — shared permissions"]
-    end
-    subgraph OBO["② User API Scopes — OBO"]
-        U2["Logged-in User"] -- "OAuth token" --> APP2["App forwards user token"]
-        APP2 --> RES2["Resources — user's own permissions"]
-    end
-
-    style SP fill:#0d1f26,stroke:#4259FE,stroke-width:2px,color:#fff
-    style OBO fill:#0d1f26,stroke:#00A972,stroke-width:2px,color:#fff
-    style U1 fill:#618693,stroke:#4a6a75,color:#fff
-    style U2 fill:#618693,stroke:#4a6a75,color:#fff
-    style APP1 fill:#4259FE,stroke:#2f44d4,color:#fff
-    style APP2 fill:#00A972,stroke:#008a5c,color:#fff
-    style RES1 fill:#1B5162,stroke:#0d3a48,color:#fff
-    style RES2 fill:#1B5162,stroke:#0d3a48,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/01-auth-comparison.svg" alt="SP vs OBO Authentication">
 </p>
@@ -298,21 +256,6 @@ user_client = get_user_workspace_client()
 
 Most production agents use **both** approaches. The service principal handles shared resources while OBO handles user-specific data:
 
-<!-- Mermaid source for Combined Authentication (re-render: mmdc -i input.mmd -o 01-auth-combined.svg -t neutral -b transparent)
-graph LR
-    USER["👤 User"] --> APP["🤖 Agent App"]
-    APP -- "SP auth" --> LLM["🧠 LLM Endpoint"]
-    APP -- "SP auth" --> MLF["📊 MLflow"]
-    APP -- "User token" --> SQL["🗄️ SQL Warehouse"]
-    APP -- "User token" --> UC["📋 UC Tables"]
-
-    style USER fill:#618693,stroke:#4a6a75,color:#fff
-    style APP fill:#FF3621,stroke:#c42a1a,color:#fff
-    style LLM fill:#4259FE,stroke:#2f44d4,color:#fff
-    style MLF fill:#4259FE,stroke:#2f44d4,color:#fff
-    style SQL fill:#00A972,stroke:#008a5c,color:#fff
-    style UC fill:#00A972,stroke:#008a5c,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/01-auth-combined.svg" alt="Combined Authentication">
 </p>
@@ -370,24 +313,6 @@ def get_user_workspace_client() -> WorkspaceClient:
 
 ## Development Workflow
 
-<!-- Mermaid source for Development Workflow (re-render: mmdc -i input.mmd -o 01-dev-workflow.svg -t neutral -b transparent)
-graph LR
-    A["1. databricks auth login"] --> B["2. Configure .env.local"]
-    B --> C["3. uv sync"]
-    C --> D["4. uv run start-app"]
-    D --> E["5. Test at localhost:8000"]
-    E -- "Edit agent.py" --> D
-    E -- "Ready to ship" --> F["6. Deploy"]
-    F --> G["✅ Live on *.databricksapps.com"]
-
-    style A fill:#618693,stroke:#4a6a75,color:#fff
-    style B fill:#618693,stroke:#4a6a75,color:#fff
-    style C fill:#618693,stroke:#4a6a75,color:#fff
-    style D fill:#00A972,stroke:#008a5c,color:#fff
-    style E fill:#FF3621,stroke:#c42a1a,color:#fff
-    style F fill:#4259FE,stroke:#2f44d4,color:#fff
-    style G fill:#00A972,stroke:#008a5c,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/01-dev-workflow.svg" alt="Development Workflow">
 </p>

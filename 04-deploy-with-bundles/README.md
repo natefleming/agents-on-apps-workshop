@@ -198,61 +198,12 @@ targets:
     mode: production   # Full deployment
 ```
 
-<!-- Mermaid source for Multi-Target Deployment (re-render: mmdc -i input.mmd -o 04-targets.svg -t neutral -b transparent)
-graph TB
-    BUNDLE["databricks.yml"] --> DEV["dev target<br/><i>mode: development</i><br/>agents-workshop-dev-nate"]
-    BUNDLE --> STAGING["staging target<br/><i>mode: production</i><br/>agents-workshop-staging"]
-    BUNDLE --> PROD["prod target<br/><i>mode: production</i><br/>agents-workshop-prod"]
-
-    DEV -->|"databricks bundle deploy"| WS1["Dev Workspace"]
-    STAGING -->|"databricks bundle deploy -t staging"| WS2["Staging Workspace"]
-    PROD -->|"databricks bundle deploy -t prod"| WS3["Prod Workspace"]
-
-    style BUNDLE fill:#FF3621,stroke:#FF3621,color:#fff
-    style DEV fill:#00A972,stroke:#00A972,color:#fff
-    style STAGING fill:#FEAB03,stroke:#FEAB03,color:#0B2026
-    style PROD fill:#4259FE,stroke:#4259FE,color:#fff
-    style WS1 fill:#1B3139,stroke:#00A972,color:#fff
-    style WS2 fill:#1B3139,stroke:#FEAB03,color:#fff
-    style WS3 fill:#1B3139,stroke:#4259FE,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/04-targets.svg" alt="Multi-Target Deployment">
 </p>
 
 ## Step 2: Deploy
 
-<!-- Mermaid source for Bundle Deploy Pipeline (re-render: mmdc -i input.mmd -o 04-deploy-pipeline.svg -t neutral -b transparent)
-graph LR
-    subgraph LOCAL["Your Laptop"]
-        CODE["Agent Code"]
-        YAML["databricks.yml"]
-    end
-
-    YAML -->|"databricks bundle validate"| VALIDATE{"Validate"}
-    VALIDATE -->|"databricks bundle deploy"| DEPLOY["Bundle Deploy"]
-
-    DEPLOY --> CREATE_APP["Create App"]
-    DEPLOY --> CREATE_EXP["Create MLflow<br/>Experiment"]
-    DEPLOY --> SYNC["Sync Code to<br/>Workspace"]
-    DEPLOY --> PERMS["Grant SP<br/>Permissions"]
-
-    CREATE_APP --> LIVE["App is Live"]
-    CREATE_EXP --> LIVE
-    SYNC --> LIVE
-    PERMS --> LIVE
-
-    style LOCAL fill:#1B3139,stroke:#FF3621,stroke-width:2px,color:#fff
-    style CODE fill:#1B5162,stroke:#618693,color:#fff
-    style YAML fill:#FF3621,stroke:#FF3621,color:#fff
-    style VALIDATE fill:#FEAB03,stroke:#FEAB03,color:#0B2026
-    style DEPLOY fill:#00A972,stroke:#00A972,color:#fff
-    style CREATE_APP fill:#4259FE,stroke:#4259FE,color:#fff
-    style CREATE_EXP fill:#4259FE,stroke:#4259FE,color:#fff
-    style SYNC fill:#4259FE,stroke:#4259FE,color:#fff
-    style PERMS fill:#4259FE,stroke:#4259FE,color:#fff
-    style LIVE fill:#00A972,stroke:#00A972,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/04-deploy-pipeline.svg" alt="Bundle Deploy Pipeline">
 </p>

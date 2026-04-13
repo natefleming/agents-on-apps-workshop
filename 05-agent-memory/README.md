@@ -6,21 +6,6 @@ Both types use [Lakebase](https://docs.databricks.com/aws/en/lakebase/), Databri
 
 ## What Are Short-Term and Long-Term Memory?
 
-<!-- Mermaid source for Memory Architecture (re-render: mmdc -i input.mmd -o 05-memory-architecture.svg -t neutral -b transparent)
-graph LR
-    USER["User"] --> AGENT["Agent"]
-    AGENT --> STM["Short-Term Memory<br/><i>Conversation history</i>"]
-    AGENT --> LTM["Long-Term Memory<br/><i>User facts & preferences</i>"]
-    STM --> LB1["Lakebase<br/><i>AsyncCheckpointSaver</i>"]
-    LTM --> LB2["Lakebase<br/><i>AsyncDatabricksStore</i>"]
-
-    style USER fill:#618693,stroke:#4a6a75,color:#fff
-    style AGENT fill:#FF3621,stroke:#c42a1a,color:#fff
-    style STM fill:#4259FE,stroke:#2f44d4,color:#fff
-    style LTM fill:#00A972,stroke:#008a5c,color:#fff
-    style LB1 fill:#1B3139,stroke:#618693,color:#fff
-    style LB2 fill:#1B3139,stroke:#618693,color:#fff
--->
 <p align="center">
   <img src="../docs/diagrams/05-memory-architecture.svg" alt="Memory Architecture">
 </p>
@@ -148,29 +133,6 @@ async def stream_handler(
                 yield event
 ```
 
-<!-- Mermaid source for Short-Term Memory Flow (re-render: mmdc -i input.mmd -o 05-short-term-flow.svg -t neutral -b transparent)
-sequenceDiagram
-    participant U as User
-    participant A as Agent
-    participant CP as AsyncCheckpointSaver
-    participant LB as Lakebase
-
-    U->>A: "What's 2+2?" (thread: abc123)
-    A->>CP: Load thread abc123
-    CP->>LB: SELECT checkpoint
-    LB-->>CP: (empty - new thread)
-    A->>A: Process message, call tools
-    A->>CP: Save checkpoint
-    CP->>LB: INSERT messages + state
-    A-->>U: "4"
-
-    U->>A: "Multiply that by 10" (thread: abc123)
-    A->>CP: Load thread abc123
-    CP->>LB: SELECT checkpoint
-    LB-->>CP: Previous messages: ["2+2", "4"]
-    A->>A: Process with full history
-    A-->>U: "40"
--->
 <p align="center">
   <img src="../docs/diagrams/05-short-term-flow.svg" alt="Short-Term Memory Flow">
 </p>
@@ -297,32 +259,6 @@ async def stream_handler(
             yield event
 ```
 
-<!-- Mermaid source for Long-Term Memory Flow (re-render: mmdc -i input.mmd -o 05-long-term-flow.svg -t neutral -b transparent)
-sequenceDiagram
-    participant U as User
-    participant A as Agent
-    participant MT as Memory Tools
-    participant DS as AsyncDatabricksStore
-    participant LB as Lakebase
-
-    U->>A: "I prefer Python over JS"
-    A->>MT: save_user_memory("lang_pref", {"language": "Python"})
-    MT->>DS: aput(("user_memories", user_id), "lang_pref", data)
-    DS->>LB: INSERT with embedding
-    LB-->>DS: OK
-    MT-->>A: "Saved memory 'lang_pref'"
-    A-->>U: "Got it, I'll remember you prefer Python!"
-
-    Note over U,LB: Days later, new session...
-
-    U->>A: "Write a sort function"
-    A->>MT: get_user_memory("programming preferences")
-    MT->>DS: asearch(namespace, "programming preferences")
-    DS->>LB: Semantic search via embeddings
-    LB-->>DS: [lang_pref: {language: Python}]
-    MT-->>A: "User prefers Python"
-    A-->>U: "def sort_list(items):..."
--->
 <p align="center">
   <img src="../docs/diagrams/05-long-term-flow.svg" alt="Long-Term Memory Flow">
 </p>
