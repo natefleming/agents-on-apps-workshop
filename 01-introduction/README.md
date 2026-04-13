@@ -376,9 +376,9 @@ databricks apps deploy my-agent \
 
 **Best for:** Scripted workflows, rapid iteration during development, CI pipelines.
 
-### 3. Deploy from Asset Bundles
+### 3. Deploy from Automation Bundles
 
-Databricks Asset Bundles let you define your entire deployment -- the app, resources, permissions, and environment configuration -- in a single `databricks.yml` file. One command does everything:
+Databricks Automation Bundles let you define your entire deployment -- the app, resources, permissions, and environment configuration -- in a single `databricks.yml` file. One command does everything:
 
 ```bash
 databricks bundle deploy
@@ -407,7 +407,7 @@ w.apps.deploy_and_wait("my-agent", AppDeployment(source_code_path="..."))
 |--------|-------------|----------|---------------------|----------|
 | **Workspace UI** | None | Click-through | Visual form | Exploration |
 | **CLI** | `app.yaml` | 3 commands | Manual in UI | Development |
-| **Asset Bundles** | `databricks.yml` | 1 command | Declarative in YAML | Production |
+| **Automation Bundles** | `databricks.yml` | 1 command | Declarative in YAML | Production |
 | **Python SDK** | Python code | Python script | Python objects | CI/CD, automation |
 
 > **Note:** Deployed apps require **OAuth tokens** (not PATs) for API access. Use `databricks auth token` to get one.

@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/databricks-asset-bundles.json
-# Databricks Asset Bundle for the Agents on Apps Workshop
+# Databricks Automation Bundle for the Agents on Apps Workshop
 
 bundle:
   name: agents-workshop-mcp

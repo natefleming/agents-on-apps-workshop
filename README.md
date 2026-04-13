@@ -10,8 +10,8 @@ Build, test, and deploy AI agents on Databricks Apps. This workshop takes you fr
 - How to build a LangGraph agent with custom tools using the MLflow AgentServer
 - How to connect your agent to MCP (Model Context Protocol) servers for powerful, pre-built tool capabilities
 - How to add short-term and long-term memory to your agent with Lakebase
-- How to deploy via the **Workspace UI**, **CLI**, or **Asset Bundles**
-- How to use Databricks Asset Bundles for declarative, repeatable deployments
+- How to deploy via the **Workspace UI**, **CLI**, or **Automation Bundles**
+- How to use Databricks Automation Bundles for declarative, repeatable deployments
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ Build, test, and deploy AI agents on Databricks Apps. This workshop takes you fr
 | [02](./02-hello-agent/) | Hello Agent: Your First LangGraph Agent | A working agent with custom Python tools (weather, calculator) |
 | [03](./03-agent-with-mcp/) | Adding MCP Server Tools | Extend your agent with Databricks' built-in code interpreter via MCP |
 | [04](./04-agent-memory/) | Short-Term and Long-Term Memory | Conversation history and persistent user knowledge with Lakebase |
-| [05](./05-deploy-with-bundles/) | Deploying with Asset Bundles | Declarative deployment with `databricks.yml` and multi-target support |
+| [05](./05-deploy-with-bundles/) | Deploying with Automation Bundles | Declarative deployment with `databricks.yml` and multi-target support |
 | [06](./06-deploy-with-sdk/) | Deploying with the Python SDK | Programmatic deployment via `WorkspaceClient().apps` |
 
 ## Quick Start
@@ -64,7 +64,7 @@ uv run start-app
 - [Databricks Apps Auth](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) -- OBO tokens, user API scopes
 - [Databricks Apps Deploy](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/deploy) -- Deploy via CLI
 - [Databricks Apps Resources](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/resources) -- Configure app resources and permissions
-- [Databricks Asset Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/) -- Declarative deployment
+- [Databricks Automation Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/) -- Declarative deployment
 - [MLflow ResponsesAgent Docs](https://mlflow.org/docs/latest/genai/flavors/responses-agent-intro/) -- Agent input/output format
 - [Databricks App Templates (GitHub)](https://github.com/databricks/app-templates) -- Official template repository
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) -- Agent orchestration framework

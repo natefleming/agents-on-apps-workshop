@@ -1,7 +1,7 @@
 [project]
 name = "agent-with-bundles"
 version = "0.1.0"
-description = "Workshop Chapter 5: Agent deployed with Databricks Asset Bundles"
+description = "Workshop Chapter 5: Agent deployed with Databricks Automation Bundles"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

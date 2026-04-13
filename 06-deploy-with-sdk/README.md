@@ -1,6 +1,6 @@
 # Chapter 6: Deploying with the Databricks Python SDK
 
-In previous chapters, we deployed using the Workspace UI, CLI commands, or Asset Bundles. In this chapter, you'll deploy the same agent **programmatically** using the [Databricks Python SDK](https://docs.databricks.com/aws/en/dev-tools/sdk-python). This is the approach you'd use when deployment is part of a larger Python workflow, CI/CD pipeline, or custom tooling.
+In previous chapters, we deployed using the Workspace UI, CLI commands, or Automation Bundles. In this chapter, you'll deploy the same agent **programmatically** using the [Databricks Python SDK](https://docs.databricks.com/aws/en/dev-tools/sdk-python). This is the approach you'd use when deployment is part of a larger Python workflow, CI/CD pipeline, or custom tooling.
 
 ## What You'll Learn
 
@@ -13,7 +13,7 @@ In previous chapters, we deployed using the Workspace UI, CLI commands, or Asset
 
 The agent code (`agent_server/`) is **identical** to Chapters 3-5. The only difference is **how we deploy it**:
 
-| | CLI (Ch 2-3) | Asset Bundles (Ch 5) | Python SDK (Ch 6) |
+| | CLI (Ch 2-3) | Automation Bundles (Ch 5) | Python SDK (Ch 6) |
 |---|---|---|---|
 | Config | `app.yaml` | `databricks.yml` | Python code |
 | Create app | `databricks apps create` | `databricks bundle deploy` | `w.apps.create()` |
@@ -105,7 +105,7 @@ w.apps.delete("my-agent")
 
 ### Additional Resource Types
 
-The SDK supports all the same resource types as Asset Bundles:
+The SDK supports all the same resource types as Automation Bundles:
 
 ```python
 from databricks.sdk.service.apps import (
@@ -213,7 +213,7 @@ See [Chapter 2](../02-hello-agent/README.md#step-6-evaluate-your-agent) for a de
 |----------|-------------------|
 | Exploring for the first time | **Workspace UI** |
 | Quick iteration during development | **CLI** |
-| Production, multi-environment | **Asset Bundles** |
+| Production, multi-environment | **Automation Bundles** |
 | CI/CD pipelines with custom logic | **Python SDK** |
 | Deploying from Databricks notebooks | **Python SDK** |
 | Dynamic app provisioning (multi-tenant) | **Python SDK** |
@@ -240,5 +240,5 @@ You've now seen all four ways to deploy agents on Databricks Apps. Choose the ap
 
 - **UI** for exploration
 - **CLI** for development
-- **Asset Bundles** for production
+- **Automation Bundles** for production
 - **SDK** for automation and CI/CD

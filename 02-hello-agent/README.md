@@ -270,9 +270,9 @@ databricks apps deploy hello-agent \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/hello-agent
 ```
 
-### Option C: Deploy from Asset Bundles
+### Option C: Deploy from Automation Bundles
 
-Asset Bundles define everything in a single `databricks.yml` file -- no manual resource configuration needed. This is covered in detail in [Chapter 5](../05-deploy-with-bundles/).
+Automation Bundles define everything in a single `databricks.yml` file -- no manual resource configuration needed. This is covered in detail in [Chapter 5](../05-deploy-with-bundles/).
 
 ```bash
 databricks bundle deploy

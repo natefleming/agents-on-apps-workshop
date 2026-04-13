@@ -411,7 +411,7 @@ databricks apps deploy memory-agent \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/memory-agent
 ```
 
-### Option C: Deploy from Asset Bundles
+### Option C: Deploy from Automation Bundles
 
 This chapter includes a `databricks.yml` that declares all resources -- the app, MLflow experiment, and serving endpoints -- in a single file.
 
@@ -434,7 +434,7 @@ After the app is running, **grant the app's service principal access to Lakebase
 databricks apps get <your-app-name> | jq -r .service_principal_client_id
 ```
 
-> **Note:** Autoscaling Lakebase projects cannot be declared as a `database` resource in the bundle. The SP must be granted access separately. See [Chapter 5](../05-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
+> **Note:** Autoscaling Lakebase projects cannot be declared as a `database` resource in the bundle. The SP must be granted access separately. See [Chapter 5](../05-deploy-with-bundles/) for a detailed walkthrough of how Automation Bundles work.
 
 ### Lakebase Permissions
 

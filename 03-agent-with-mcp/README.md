@@ -212,9 +212,9 @@ databricks apps deploy agent-with-mcp \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/agent-with-mcp
 ```
 
-### Option C: Deploy from Asset Bundles
+### Option C: Deploy from Automation Bundles
 
-Asset Bundles define everything in a single `databricks.yml` file. This is covered in detail in [Chapter 5](../05-deploy-with-bundles/).
+Automation Bundles define everything in a single `databricks.yml` file. This is covered in detail in [Chapter 5](../05-deploy-with-bundles/).
 
 ```bash
 databricks bundle deploy
@@ -270,4 +270,4 @@ See [Chapter 2](../02-hello-agent/README.md#step-6-evaluate-your-agent) for a de
 
 In [Chapter 4](../04-agent-memory/), you'll add **short-term and long-term memory** to your agent using Lakebase, so it can remember conversation history and user preferences across sessions.
 
-Then in [Chapter 5](../05-deploy-with-bundles/), you'll learn how to use **Databricks Asset Bundles** for declarative, repeatable deployments with a single `databricks.yml` file and multi-target support (dev/staging/prod).
+Then in [Chapter 5](../05-deploy-with-bundles/), you'll learn how to use **Databricks Automation Bundles** for declarative, repeatable deployments with a single `databricks.yml` file and multi-target support (dev/staging/prod).

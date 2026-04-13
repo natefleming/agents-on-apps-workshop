@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/databricks-asset-bundles.json
-# Databricks Asset Bundle for the Agents on Apps Workshop - Memory Chapter
+# Databricks Automation Bundle for the Agents on Apps Workshop - Memory Chapter
 
 bundle:
   name: agents-workshop-memory

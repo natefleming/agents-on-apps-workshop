@@ -1,12 +1,12 @@
-# Chapter 5: Deploying with Databricks Asset Bundles
+# Chapter 5: Deploying with Databricks Automation Bundles
 
-In the previous chapters, we deployed our agent using manual CLI commands (`databricks apps create`, `databricks sync`, `databricks apps deploy`). This works fine for development, but for production you want **declarative, repeatable deployments**. That's what Databricks Asset Bundles (DABs) provide.
+In the previous chapters, we deployed our agent using manual CLI commands (`databricks apps create`, `databricks sync`, `databricks apps deploy`). This works fine for development, but for production you want **declarative, repeatable deployments**. That's what Databricks Automation Bundles (DABs) provide.
 
 In this chapter, you'll define your entire deployment -- the app, its resources, permissions, and environment configuration -- in a single `databricks.yml` file. No separate `app.yaml` needed.
 
-## What are Databricks Asset Bundles?
+## What are Databricks Automation Bundles?
 
-[Databricks Asset Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/) are a declarative way to define and deploy Databricks resources. Think of them like Terraform or CloudFormation, but specifically for Databricks.
+[Databricks Automation Bundles](https://docs.databricks.com/aws/en/dev-tools/bundles/) are a declarative way to define and deploy Databricks resources. Think of them like Terraform or CloudFormation, but specifically for Databricks.
 
 A bundle can declare:
 - **Apps** - with their config, resources, and permissions
@@ -338,6 +338,6 @@ apps:
 
 ## Reference
 
-- [Databricks Asset Bundles Docs](https://docs.databricks.com/aws/en/dev-tools/bundles/)
+- [Databricks Automation Bundles Docs](https://docs.databricks.com/aws/en/dev-tools/bundles/)
 - [Bundle App Resource](https://docs.databricks.com/aws/en/dev-tools/bundles/resources/apps)
 - [Bundle Configuration Schema](https://docs.databricks.com/aws/en/dev-tools/bundles/settings)
