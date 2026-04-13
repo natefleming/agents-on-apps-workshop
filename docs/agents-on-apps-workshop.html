@@ -593,21 +593,27 @@ w.apps.<span class="func">deploy</span>(app_name=<span class="string">"my-agent"
         <div>
           <h3 style="color: white; margin-bottom: 0.75rem;"><span class="tag tag-green">Git Repository</span></h3>
           <p style="color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-bottom: 1rem;">Deploy directly from a branch, tag, or commit. No sync needed.</p>
-          <div class="code-block" style="font-size: 0.7rem; padding: 1rem; line-height: 1.5;"><span class="comment"># CLI</span>
-databricks apps deploy my-agent \
-  --git-url <span class="string">https://github.com/org/repo</span> \
-  --git-provider <span class="string">gitHub</span> \
-  --git-branch <span class="string">main</span> \
-  --source-code-path <span class="string">./apps/my-agent</span>
+          <div class="code-block" style="font-size: 0.7rem; padding: 1rem; line-height: 1.5;"><span class="comment"># CLI (pass git source as JSON)</span>
+databricks apps deploy my-agent --json <span class="string">'{
+  "git_source": {
+    "git_repository": {
+      "url": "https://github.com/org/repo",
+      "provider": "gitHub"
+    },
+    "branch": "main",
+    "source_code_path": "./apps/my-agent"
+  }
+}'</span>
 
 <span class="comment"># Automation Bundles (databricks.yml)</span>
 <span class="type">resources</span>:
   <span class="type">apps</span>:
     <span class="type">my-agent</span>:
+      <span class="type">git_repository</span>:
+        <span class="type">url</span>: <span class="string">https://github.com/org/repo</span>
+        <span class="type">provider</span>: <span class="string">gitHub</span>
       <span class="type">git_source</span>:
-        <span class="type">git_url</span>: <span class="string">https://github.com/org/repo</span>
-        <span class="type">git_provider</span>: <span class="string">gitHub</span>
-        <span class="type">git_branch</span>: <span class="string">main</span>
+        <span class="type">branch</span>: <span class="string">main</span>
         <span class="type">source_code_path</span>: <span class="string">./apps/my-agent</span>
 
 <span class="comment"># SDK</span>
