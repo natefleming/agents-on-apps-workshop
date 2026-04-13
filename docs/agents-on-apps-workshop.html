@@ -766,7 +766,12 @@ MODEL = <span class="type">ChatDatabricks</span>(
           </div>
         </div>
         <div>
-          <div class="code-block" style="font-size: 0.72rem;"><span class="comment"># Both backed by Lakebase</span>
+          <div class="code-block" style="font-size: 0.68rem;"><span class="keyword">from</span> databricks_langchain <span class="keyword">import</span> (
+    <span class="type">AsyncCheckpointSaver</span>,
+    <span class="type">AsyncDatabricksStore</span>,
+)
+
+<span class="comment"># Both backed by Lakebase</span>
 <span class="keyword">async with</span> <span class="type">AsyncCheckpointSaver</span>(
     instance_name=LAKEBASE
 ) <span class="keyword">as</span> checkpointer:
