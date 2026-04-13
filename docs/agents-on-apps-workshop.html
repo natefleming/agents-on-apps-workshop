@@ -472,6 +472,9 @@ databricks bundle deploy
 databricks bundle deploy -t staging
 databricks bundle deploy -t prod
 
+<span class="comment"># Run the deployed app</span>
+databricks bundle run
+
 <span class="comment"># Check status / tear down</span>
 databricks bundle summary
 databricks bundle destroy</div>
@@ -621,8 +624,36 @@ w.apps.<span class="func">delete</span>(<span class="string">"my-agent"</span>)<
     </div>
   </section>
 
-  <!-- Slide 11: Chapter 2 - Hello Agent -->
-  <section class="slide slide-dark" aria-label="Slide 11: Chapter 2 Hello Agent">
+  <!-- Slide 11: @invoke and @stream -->
+  <section class="slide slide-ink" aria-label="Slide 11: invoke and stream decorators">
+    <div class="slide-content">
+      <div class="section-label">The Server Contract</div>
+      <h2>@invoke() and @stream()</h2>
+      <div class="accent-line"></div>
+      <p style="color: rgba(255,255,255,0.7); max-width: 700px;">These decorators register your agent functions with the MLflow AgentServer. It handles the REST API, auth, and tracing.</p>
+      <div class="code-block" style="margin-top: 1.5rem; font-size: 0.78rem;"><span class="decorator">@invoke()</span>
+<span class="keyword">async def</span> <span class="func">non_streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">ResponsesAgentResponse</span>:
+    <span class="string">"""Called for non-streaming requests."""</span>
+    outputs = [event.item <span class="keyword">async for</span> event <span class="keyword">in</span> streaming(request)
+               <span class="keyword">if</span> event.type == <span class="string">"response.output_item.done"</span>]
+    <span class="keyword">return</span> <span class="type">ResponsesAgentResponse</span>(output=outputs)
+
+
+<span class="decorator">@stream()</span>
+<span class="keyword">async def</span> <span class="func">streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">AsyncGenerator</span>:
+    <span class="string">"""Called for streaming requests. Yields events in real time."""</span>
+    agent = <span class="keyword">await</span> init_agent()
+    messages = {<span class="string">"messages"</span>: to_chat_completions_input(request.input)}
+
+    <span class="keyword">async for</span> event <span class="keyword">in</span> process_agent_astream_events(
+        agent.astream(input=messages, stream_mode=[<span class="string">"updates"</span>, <span class="string">"messages"</span>])
+    ):
+        <span class="keyword">yield</span> event</div>
+    </div>
+  </section>
+
+  <!-- Slide 12: Chapter 2 - Hello Agent -->
+  <section class="slide slide-dark" aria-label="Slide 12: Chapter 2 Hello Agent">
     <div class="slide-content">
       <div class="section-label">Chapter 2</div>
       <h2>Hello Agent: Custom Tools</h2>
@@ -665,34 +696,6 @@ MODEL = <span class="type">ChatDatabricks</span>(
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Slide 12: @invoke and @stream -->
-  <section class="slide slide-ink" aria-label="Slide 12: invoke and stream decorators">
-    <div class="slide-content">
-      <div class="section-label">The Server Contract</div>
-      <h2>@invoke() and @stream()</h2>
-      <div class="accent-line"></div>
-      <p style="color: rgba(255,255,255,0.7); max-width: 700px;">These decorators register your agent functions with the MLflow AgentServer. It handles the REST API, auth, and tracing.</p>
-      <div class="code-block" style="margin-top: 1.5rem; font-size: 0.78rem;"><span class="decorator">@invoke()</span>
-<span class="keyword">async def</span> <span class="func">non_streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">ResponsesAgentResponse</span>:
-    <span class="string">"""Called for non-streaming requests."""</span>
-    outputs = [event.item <span class="keyword">async for</span> event <span class="keyword">in</span> streaming(request)
-               <span class="keyword">if</span> event.type == <span class="string">"response.output_item.done"</span>]
-    <span class="keyword">return</span> <span class="type">ResponsesAgentResponse</span>(output=outputs)
-
-
-<span class="decorator">@stream()</span>
-<span class="keyword">async def</span> <span class="func">streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">AsyncGenerator</span>:
-    <span class="string">"""Called for streaming requests. Yields events in real time."""</span>
-    agent = <span class="keyword">await</span> init_agent()
-    messages = {<span class="string">"messages"</span>: to_chat_completions_input(request.input)}
-
-    <span class="keyword">async for</span> event <span class="keyword">in</span> process_agent_astream_events(
-        agent.astream(input=messages, stream_mode=[<span class="string">"updates"</span>, <span class="string">"messages"</span>])
-    ):
-        <span class="keyword">yield</span> event</div>
     </div>
   </section>
 
