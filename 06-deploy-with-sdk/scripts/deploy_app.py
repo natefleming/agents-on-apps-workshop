@@ -22,7 +22,7 @@ from databricks.sdk.service.apps import (
     AppResource,
     AppResourceExperiment,
     AppResourceServingEndpoint,
-    EnvVariable,
+    EnvVar,
 )
 
 
@@ -61,7 +61,7 @@ def deploy_app(
     w: WorkspaceClient,
     app_name: str,
     source_code_path: str,
-    env_vars: list[EnvVariable] | None = None,
+    env_vars: list[EnvVar] | None = None,
 ) -> AppDeployment:
     """Deploy (or redeploy) the app from the given source code path."""
     print(f"  Deploying from {source_code_path}...")
@@ -96,12 +96,24 @@ def main():
     # Step 1: Define app resources
     # =========================================================================
     print("\n[1/4] Configuring resources...")
+
+    # Create or get the MLflow experiment to obtain its ID
+    import mlflow
+    mlflow.set_tracking_uri("databricks")
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    if experiment is None:
+        experiment_id = mlflow.create_experiment(experiment_name)
+        print(f"  Created MLflow experiment: {experiment_name} (ID: {experiment_id})")
+    else:
+        experiment_id = experiment.experiment_id
+        print(f"  Using existing MLflow experiment: {experiment_name} (ID: {experiment_id})")
+
     resources = [
         AppResource(
             name="experiment",
             description="MLflow experiment for tracing agent interactions",
             experiment=AppResourceExperiment(
-                experiment_name=experiment_name,
+                experiment_id=experiment_id,
                 permission="CAN_MANAGE",
             ),
         ),
@@ -140,8 +152,8 @@ def main():
     # =========================================================================
     print("\n[4/4] Deploying app...")
     env_vars = [
-        EnvVariable(name="MLFLOW_TRACKING_URI", value="databricks"),
-        EnvVariable(name="MLFLOW_REGISTRY_URI", value="databricks-uc"),
+        EnvVar(name="MLFLOW_TRACKING_URI", value="databricks"),
+        EnvVar(name="MLFLOW_REGISTRY_URI", value="databricks-uc"),
     ]
     deployment = deploy_app(w, args.app_name, source_code_path, env_vars)
 

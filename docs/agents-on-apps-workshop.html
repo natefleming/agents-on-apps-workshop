@@ -499,7 +499,7 @@ databricks bundle destroy</div>
           <div class="code-block" style="font-size: 0.7rem; padding: 1.25rem;"><span class="keyword">from</span> databricks.sdk <span class="keyword">import</span> <span class="type">WorkspaceClient</span>
 <span class="keyword">from</span> databricks.sdk.service.apps <span class="keyword">import</span> (
     <span class="type">App</span>, <span class="type">AppDeployment</span>, <span class="type">AppResource</span>,
-    <span class="type">AppResourceServingEndpoint</span>, <span class="type">EnvVariable</span>,
+    <span class="type">AppResourceServingEndpoint</span>, <span class="type">EnvVar</span>,
 )
 
 w = <span class="type">WorkspaceClient</span>()
@@ -521,7 +521,7 @@ w.apps.<span class="func">deploy_and_wait</span>(
     <span class="string">"my-agent"</span>,
     <span class="type">AppDeployment</span>(
         source_code_path=<span class="string">"/Workspace/Users/me/agent"</span>,
-        env_vars=[<span class="type">EnvVariable</span>(
+        env_vars=[<span class="type">EnvVar</span>(
             name=<span class="string">"MLFLOW_TRACKING_URI"</span>,
             value=<span class="string">"databricks"</span>,
         )],
@@ -647,7 +647,7 @@ w.apps.<span class="func">delete</span>(<span class="string">"my-agent"</span>)<
           <div class="code-block" style="font-size: 0.75rem;"><span class="comment"># Create the agent</span>
 TOOLS = [get_current_time, calculate]
 MODEL = <span class="type">ChatDatabricks</span>(
-    endpoint=<span class="string">"databricks-claude-sonnet-4"</span>
+    endpoint=<span class="string">"databricks-claude-sonnet-4-5"</span>
 )
 
 <span class="keyword">def</span> <span class="func">init_agent</span>():
@@ -773,7 +773,7 @@ MODEL = <span class="type">ChatDatabricks</span>(
     <span class="keyword">async with</span> <span class="type">AsyncDatabricksStore</span>(
         instance_name=LAKEBASE,
         embedding_endpoint=<span class="string">"databricks-gte-large-en"</span>,
-        embedding_dims=<span class="string">1024</span>,
+        embedding_dims=<span class="keyword">1024</span>,
     ) <span class="keyword">as</span> store:
         agent = <span class="keyword">await</span> init_agent(
             checkpointer=checkpointer,

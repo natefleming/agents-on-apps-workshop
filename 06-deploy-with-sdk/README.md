@@ -32,7 +32,7 @@ The deployment logic lives in `scripts/deploy_app.py`. Here's the core workflow:
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.apps import (
     App, AppDeployment, AppResource,
-    AppResourceExperiment, AppResourceServingEndpoint, EnvVariable,
+    AppResourceExperiment, AppResourceServingEndpoint, EnvVar,
 )
 
 w = WorkspaceClient()
@@ -42,7 +42,7 @@ resources = [
     AppResource(
         name="experiment",
         experiment=AppResourceExperiment(
-            experiment_name="/Users/me/agents-workshop-sdk",
+            experiment_id="1234567890",  # MLflow experiment ID
             permission="CAN_MANAGE",
         ),
     ),
@@ -74,7 +74,7 @@ deployment = w.apps.deploy_and_wait(
     app_deployment=AppDeployment(
         source_code_path="/Workspace/Users/me/my-agent",
         env_vars=[
-            EnvVariable(name="MLFLOW_TRACKING_URI", value="databricks"),
+            EnvVar(name="MLFLOW_TRACKING_URI", value="databricks"),
         ],
     ),
 )
