@@ -1,5 +1,7 @@
 # Chapter 1: Introduction to Agents on Apps
 
+> **[Open the Workshop Presentation](../docs/agents-on-apps-workshop.html)** -- Interactive slide deck to follow along with this workshop.
+
 ## What is an "Agent on an App"?
 
 An **Agent on an App** is an AI agent deployed as a Databricks App. Instead of deploying your agent behind a Model Serving endpoint, you deploy it as a full application that:
@@ -366,7 +368,7 @@ graph LR
     C --> D["4. uv run start-app"]
     D --> E["5. Test at localhost:8000"]
     E -- "Edit agent.py" --> D
-    E -- "Ready to ship" --> F["6. databricks bundle deploy"]
+    E -- "Ready to ship" --> F["6. Deploy"]
     F --> G["✅ Live on *.databricksapps.com"]
 
     style A fill:#618693,stroke:#4a6a75,color:#fff
@@ -413,29 +415,49 @@ curl -X POST http://localhost:8000/invocations \
   -d '{ "input": [{ "role": "user", "content": "hello" }] }'
 ```
 
-### Deploy to Databricks
+## Deployment Methods
+
+This workshop covers three ways to deploy your agent to Databricks Apps. Each method is demonstrated in the chapter deployment steps.
+
+### 1. Deploy from Workspace UI
+
+The Databricks workspace UI provides a visual, click-through deployment experience. Navigate to **Compute > Apps > Create App**, configure your app name and source code path, add resources (MLflow experiments, serving endpoints, databases) via the form, and click **Deploy**.
+
+**Best for:** First-time users, quick exploration, one-off deployments.
+
+### 2. Deploy from CLI
+
+The Databricks CLI lets you create and deploy apps with a few commands. You create the app, sync your source code to the workspace, add resources via the UI, and deploy:
 
 ```bash
-# 1. Create the app
 databricks apps create my-agent
-
-# 2. Add resources (MLflow experiment, serving endpoints) via the app's edit page
-
-# 3. Sync code to workspace
 DATABRICKS_USERNAME=$(databricks current-user me | jq -r .userName)
 databricks sync . "/Users/$DATABRICKS_USERNAME/my-agent"
-
-# 4. Deploy
 databricks apps deploy my-agent \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/my-agent
-
-# 5. Query (must use OAuth token, not PAT)
-databricks auth token
-curl -X POST <app-url>/invocations \
-  -H "Authorization: Bearer <oauth-token>" \
-  -H "Content-Type: application/json" \
-  -d '{ "input": [{ "role": "user", "content": "hello" }], "stream": true }'
 ```
+
+**Best for:** Scripted workflows, rapid iteration during development, CI pipelines.
+
+### 3. Deploy from Asset Bundles
+
+Databricks Asset Bundles let you define your entire deployment -- the app, resources, permissions, and environment configuration -- in a single `databricks.yml` file. One command does everything:
+
+```bash
+databricks bundle deploy
+```
+
+**Best for:** Production deployments, team collaboration, multi-environment (dev/staging/prod).
+
+### Comparison
+
+| Method | Config File | Commands | Resource Management | Best For |
+|--------|-------------|----------|---------------------|----------|
+| **Workspace UI** | None | Click-through | Visual form | Exploration |
+| **CLI** | `app.yaml` | 3 commands | Manual in UI | Development |
+| **Asset Bundles** | `databricks.yml` | 1 command | Declarative in YAML | Production |
+
+> **Note:** Deployed apps require **OAuth tokens** (not PATs) for API access. Use `databricks auth token` to get one.
 
 ## Reference
 

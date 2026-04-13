@@ -269,30 +269,50 @@ If you're running with `--reload`, the server will restart automatically. Try: *
 
 ## Step 5: Deploy to Databricks Apps
 
-### Create the App
+There are three ways to deploy your agent. Choose the one that fits your workflow.
+
+### Option A: Deploy from Workspace UI
+
+This is the easiest way to deploy for the first time:
+
+1. In the Databricks workspace, navigate to **Compute > Apps**
+2. Click **Create App**
+3. Enter a name (e.g., `hello-agent`) and set the source code path
+4. Under **Resources**, click **Add Resource** and add:
+   - **MLflow Experiment**: Select the experiment you created earlier. Set permission to **CAN_MANAGE**
+   - **Serving Endpoint**: Select `databricks-claude-sonnet-4-5`. Set permission to **CAN_QUERY**
+5. Upload your source code or sync it from workspace files
+6. Click **Deploy**
+
+The UI automatically creates a service principal for the app and grants it the permissions you configured.
+
+### Option B: Deploy from CLI
+
+Use the Databricks CLI for a scriptable deployment:
 
 ```bash
+# 1. Create the app
 databricks apps create hello-agent
-```
 
-### Add Resources
+# 2. Add resources via the app's edit page in the UI:
+#    - MLflow Experiment (CAN_MANAGE)
+#    - Serving Endpoint: databricks-claude-sonnet-4-5 (CAN_QUERY)
 
-In the Databricks UI, go to your app and click **Edit**. Add:
-- An **MLflow Experiment** resource (use the experiment you created earlier)
-- A **Serving Endpoint** resource for the model your agent uses (e.g., `databricks-claude-sonnet-4-5`)
-
-Grant the app's service principal the necessary permissions.
-
-### Sync and Deploy
-
-```bash
-# Sync your code to the workspace
+# 3. Sync your code to the workspace
 DATABRICKS_USERNAME=$(databricks current-user me | jq -r .userName)
 databricks sync . "/Users/$DATABRICKS_USERNAME/hello-agent"
 
-# Deploy
+# 4. Deploy
 databricks apps deploy hello-agent \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/hello-agent
+```
+
+### Option C: Deploy from Asset Bundles
+
+Asset Bundles define everything in a single `databricks.yml` file -- no manual resource configuration needed. This is covered in detail in [Chapter 4](../04-deploy-with-bundles/).
+
+```bash
+databricks bundle deploy
 ```
 
 ### Query Your Deployed Agent

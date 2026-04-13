@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agents on Apps Workshop — Databricks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --db-lava: #FF3621;
+      --db-lava-light: #FF5F46;
+      --db-navy: #1B3139;
+      --db-ink: #0B2026;
+      --db-teal: #1B5162;
+      --db-green: #00A972;
+      --db-oat: #F9F7F4;
+      --db-oat-medium: #EEEDE9;
+      --db-oat-dark: #DBD7CE;
+      --db-white: #FFFFFF;
+      --db-black: #000000;
+      --db-burgundy: #970F29;
+      --db-amber: #FEAB03;
+      --db-muted-teal: #618693;
+      --db-indigo: #4259FE;
+      --bg-primary: var(--db-oat);
+      --bg-dark: var(--db-navy);
+      --text-primary: var(--db-ink);
+      --text-secondary: #4A5E68;
+      --text-on-dark: var(--db-white);
+      --accent: var(--db-lava);
+      --divider: var(--db-oat-medium);
+      --font-display: 'DM Sans', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: auto; overflow-y: scroll; scroll-snap-type: y mandatory; }
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); overflow-x: hidden; }
+    .slide { height: 100vh; height: 100dvh; scroll-snap-align: start; padding: clamp(2rem, 5vw, 4rem); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; opacity: 1; overflow-y: auto; }
+    .slide-content { width: 100%; max-width: 1100px; margin: 0 auto; }
+
+    /* Slide themes */
+    .slide-dark { background: var(--db-navy); color: var(--db-white); }
+    .slide-ink { background: var(--db-ink); color: var(--db-white); }
+    .slide-light { background: var(--db-oat); color: var(--db-ink); }
+    .slide-white { background: var(--db-white); color: var(--db-ink); }
+
+    /* Typography */
+    h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.5rem, 5vw, 4.2rem); letter-spacing: -0.02em; line-height: 1.1; }
+    h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.8rem, 3.5vw, 2.8rem); letter-spacing: -0.01em; line-height: 1.2; }
+    h3 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.2rem, 2vw, 1.5rem); line-height: 1.3; }
+    p, li { font-family: var(--font-body); font-weight: 400; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.6; }
+    code, .mono { font-family: var(--font-mono); font-weight: 400; font-size: 0.85em; }
+
+    /* Logo */
+    .db-logo { height: 28px; width: auto; }
+    .title-slide .db-logo { height: 36px; }
+
+    /* Progress bar */
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 100; transition: width 0.3s ease; }
+    .nav-dots { position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+    .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--db-oat-medium); border: none; cursor: pointer; transition: all 0.3s ease; padding: 0; }
+    .nav-dot.active { background: var(--accent); transform: scale(1.4); }
+
+    /* Accent line */
+    .accent-line { width: 60px; height: 4px; background: var(--db-lava); border-radius: 2px; margin: 1rem 0; }
+    .accent-line-sm { width: 40px; height: 3px; background: var(--db-lava); border-radius: 2px; margin: 0.75rem 0; }
+
+    /* Subtitle */
+    .subtitle { font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 400; opacity: 0.8; margin-top: 0.5rem; }
+    .slide-dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    /* Card grid */
+    .card-grid { display: grid; gap: 1.5rem; margin-top: 2rem; }
+    .card-grid-2 { grid-template-columns: 1fr 1fr; }
+    .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .card-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .card { padding: 1.5rem; border-radius: 12px; transition: transform 0.3s ease; }
+    .card:hover { transform: translateY(-3px); }
+    .slide-dark .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+    .slide-dark .card h3 { color: white; }
+    .slide-dark .card p { color: rgba(255,255,255,0.7); }
+    .slide-light .card, .slide-white .card { background: var(--db-white); border: 1px solid var(--db-oat-medium); }
+    .card-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .card h3 { margin-bottom: 0.5rem; }
+    .card p { font-size: 0.95rem; }
+
+    /* Code block */
+    .code-block { background: var(--db-ink); color: #e0e0e0; padding: 1.5rem; border-radius: 12px; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; overflow-x: auto; margin-top: 1.5rem; white-space: pre; }
+    .slide-dark .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); }
+    .code-block .keyword { color: var(--db-indigo); }
+    .code-block .decorator { color: var(--db-amber); }
+    .code-block .string { color: var(--db-green); }
+    .code-block .comment { color: var(--db-muted-teal); }
+    .code-block .func { color: var(--db-lava-light); }
+    .code-block .type { color: #7ec8e3; }
+
+    /* Diagram */
+    .diagram { display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 900px; margin: 2rem auto; }
+    .diagram-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .diagram-node { padding: 0.9rem 1.4rem; border-radius: 10px; font-family: var(--font-body); font-weight: 500; font-size: 0.9rem; text-align: center; min-width: 130px; }
+    .diagram-node.primary { background: var(--db-lava); color: white; }
+    .diagram-node.secondary { background: var(--db-navy); color: white; }
+    .diagram-node.accent { background: var(--db-teal); color: white; }
+    .diagram-node.green { background: var(--db-green); color: white; }
+    .diagram-node.amber { background: var(--db-amber); color: var(--db-ink); }
+    .diagram-node.indigo { background: var(--db-indigo); color: white; }
+    .diagram-node.outline { background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white; }
+    .slide-light .diagram-node.outline { border-color: var(--db-oat-dark); color: var(--db-ink); }
+    .diagram-arrow { font-size: 1.3rem; color: rgba(255,255,255,0.4); }
+    .slide-light .diagram-arrow { color: var(--db-oat-dark); }
+    .diagram-connector { width: 2px; height: 1.5rem; background: rgba(255,255,255,0.3); position: relative; }
+    .diagram-connector::after { content: '\u25BC'; position: absolute; bottom: -0.6rem; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: rgba(255,255,255,0.4); }
+    .slide-light .diagram-connector { background: var(--db-oat-dark); }
+    .slide-light .diagram-connector::after { color: var(--db-oat-dark); }
+
+    /* Two column */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; margin-top: 2rem; }
+
+    /* Comparison grid */
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 900px; margin: 2rem auto; }
+    .comparison-card { padding: 1.5rem; border-radius: 12px; }
+    .comparison-card.before { background: rgba(151, 15, 41, 0.08); border: 1px solid rgba(151, 15, 41, 0.2); }
+    .comparison-card.after { background: rgba(0, 169, 114, 0.08); border: 1px solid rgba(0, 169, 114, 0.2); }
+    .comparison-card h3 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .comparison-card.before h3 { color: var(--db-burgundy); }
+    .comparison-card.after h3 { color: var(--db-green); }
+
+    /* Tag */
+    .tag { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; font-family: var(--font-mono); }
+    .tag-lava { background: rgba(255,54,33,0.15); color: var(--db-lava); }
+    .tag-green { background: rgba(0,169,114,0.15); color: var(--db-green); }
+    .tag-teal { background: rgba(27,81,98,0.15); color: var(--db-teal); }
+    .tag-amber { background: rgba(254,171,3,0.15); color: #b47a00; }
+    .slide-dark .tag-lava { background: rgba(255,54,33,0.2); color: var(--db-lava-light); }
+    .slide-dark .tag-green { background: rgba(0,169,114,0.2); color: #5cd6a8; }
+    .slide-dark .tag-teal { background: rgba(27,81,98,0.3); color: #7ec8e3; }
+    .slide-dark .tag-amber { background: rgba(254,171,3,0.2); color: var(--db-amber); }
+
+    /* Metric card */
+    .metric-card { text-align: center; padding: 2rem; }
+    .metric-value { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.5rem, 6vw, 4rem); color: var(--db-lava); line-height: 1; }
+    .metric-label { font-size: 1rem; margin-top: 0.5rem; }
+    .slide-dark .metric-label { color: rgba(255,255,255,0.6); }
+
+    /* Bullet list */
+    .bullet-list { list-style: none; padding: 0; }
+    .bullet-list li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; }
+    .bullet-list li::before { content: ''; position: absolute; left: 0; top: 0.85rem; width: 8px; height: 8px; border-radius: 50%; background: var(--db-lava); }
+    .slide-dark .bullet-list li { color: rgba(255,255,255,0.85); }
+
+    /* Section label */
+    .section-label { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--db-lava); margin-bottom: 0.75rem; font-weight: 500; }
+
+    /* Inline code */
+    .inline-code { background: rgba(0,0,0,0.06); padding: 0.15em 0.4em; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em; }
+    .slide-dark .inline-code { background: rgba(255,255,255,0.1); }
+
+    /* Timeline */
+    .timeline { position: relative; max-width: 700px; margin: 2rem auto; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--db-oat-dark); }
+    .slide-dark .timeline::before { background: rgba(255,255,255,0.2); }
+    .timeline-item { position: relative; padding: 0 0 1.5rem 2rem; }
+    .timeline-item::before { content: ''; position: absolute; left: -0.45rem; top: 0.25rem; width: 12px; height: 12px; border-radius: 50%; background: var(--db-lava); border: 2px solid var(--db-oat); }
+    .slide-dark .timeline-item::before { border-color: var(--db-navy); }
+    .timeline-item h4 { font-weight: 700; margin-bottom: 0.25rem; }
+    .timeline-item p { color: var(--text-secondary); font-size: 0.95rem; }
+    .slide-dark .timeline-item h4 { color: white; }
+    .slide-dark .timeline-item p { color: rgba(255,255,255,0.6); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-dots { display: none; }
+      .slide { padding: 1.5rem; }
+      .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; gap: 1.5rem; }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .diagram-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+  <nav class="nav-dots" aria-label="Slide navigation"></nav>
+
+  <!-- Slide 1: Title -->
+  <section class="slide slide-dark title-slide" aria-label="Slide 1: Title">
+    <div class="slide-content" style="text-align: center;">
+      <svg class="db-logo" viewBox="0 0 713 113" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Databricks" style="margin-bottom: 2.5rem;">
+        <g clip-path="url(#clip0_dark_title)">
+          <path d="M98.9 46.5996L52.3 72.8996L2.4 44.7996L0 46.0996V66.4996L52.3 95.8996L98.9 69.6996V80.4996L52.3 106.8L2.4 78.6996L0 79.9996V83.4996L52.3 112.9L104.5 83.4996V63.0996L102.1 61.7996L52.3 89.7996L5.6 63.5996V52.7996L52.3 78.9996L104.5 49.5996V29.4996L101.9 27.9996L52.3 55.8996L8 31.0996L52.3 6.19961L88.7 26.6996L91.9 24.8996V22.3996L52.3 0.0996094L0 29.4996V32.6996L52.3 62.0996L98.9 35.7996V46.5996Z" fill="#FF3621"/>
+          <path d="M202.2 96.1994V6.39941H188.4V39.9994C188.4 40.4994 188.1 40.8994 187.6 41.0994C187.1 41.2994 186.6 41.0994 186.3 40.7994C181.6 35.2994 174.3 32.1994 166.3 32.1994C149.2 32.1994 135.8 46.5994 135.8 64.9994C135.8 73.9994 138.9 82.2994 144.6 88.3994C150.3 94.4994 158 97.7994 166.3 97.7994C174.2 97.7994 181.5 94.4994 186.3 88.7994C186.6 88.3994 187.2 88.2994 187.6 88.3994C188.1 88.5994 188.4 88.9994 188.4 89.4994V96.1994H202.2ZM169.3 85.2994C158.3 85.2994 149.7 76.3994 149.7 64.9994C149.7 53.5994 158.3 44.6994 169.3 44.6994C180.3 44.6994 188.9 53.5994 188.9 64.9994C188.9 76.3994 180.3 85.2994 169.3 85.2994Z" fill="white"/>
+          <path d="M276 96.0996V33.6996H262.3V39.9996C262.3 40.4996 262 40.8996 261.5 41.0996C261 41.2996 260.5 41.0996 260.2 40.6996C255.6 35.1996 248.4 32.0996 240.2 32.0996C223.1 32.0996 209.7 46.4996 209.7 64.8996C209.7 83.2996 223.1 97.6996 240.2 97.6996C248.1 97.6996 255.4 94.3996 260.2 88.5996C260.5 88.1996 261.1 88.0996 261.5 88.1996C262 88.3996 262.3 88.7996 262.3 89.2996V96.0996H276ZM243.3 85.2996C232.3 85.2996 223.7 76.3996 223.7 64.9996C223.7 53.5996 232.3 44.6996 243.3 44.6996C254.3 44.6996 262.9 53.5996 262.9 64.9996C262.9 76.3996 254.3 85.2996 243.3 85.2996Z" fill="white"/>
+          <path d="M314.4 97.1994C318.8 97.1994 322.7 96.7994 324.9 96.4994V84.4994C323.1 84.6994 319.9 84.8994 318 84.8994C312.4 84.8994 308.1 83.8994 308.1 71.7994V46.0994C308.1 45.3994 308.6 44.8994 309.3 44.8994H322.8V33.5994H309.3C308.6 33.5994 308.1 33.0994 308.1 32.3994V14.3994H294.3V32.4994C294.3 33.1994 293.8 33.6994 293.1 33.6994H283.5V44.9994H293.1C293.8 44.9994 294.3 45.4994 294.3 46.1994V75.2994C294.3 97.1994 308.9 97.1994 314.4 97.1994Z" fill="white"/>
+          <path d="M393.3 96.1996V33.6996H379.6V39.9996C379.6 40.4996 379.3 40.8996 378.8 41.0996C378.3 41.2996 377.8 41.0996 377.5 40.6996C372.9 35.1996 365.7 32.0996 357.5 32.0996C340.3 32.0996 327 46.4996 327 64.9996C327 83.4996 340.4 97.7996 357.5 97.7996C365.4 97.7996 372.7 94.4996 377.5 88.6996C377.8 88.2996 378.4 88.1996 378.8 88.2996C379.3 88.4996 379.6 88.8996 379.6 89.3996V96.1996H393.3ZM360.6 85.2996C349.6 85.2996 341 76.3996 341 64.9996C341 53.5996 349.6 44.6996 360.6 44.6996C371.6 44.6996 380.2 53.5996 380.2 64.9996C380.2 76.3996 371.6 85.2996 360.6 85.2996Z" fill="white"/>
+          <path d="M418.4 88.7994C418.5 88.7994 418.7 88.6994 418.8 88.6994C419.1 88.6994 419.5 88.8994 419.7 89.0994C424.4 94.5994 431.7 97.6994 439.7 97.6994C456.8 97.6994 470.2 83.2994 470.2 64.8994C470.2 55.8994 467.1 47.5994 461.4 41.4994C455.7 35.3994 448 32.0994 439.7 32.0994C431.8 32.0994 424.5 35.3994 419.7 41.0994C419.4 41.4994 418.9 41.5994 418.4 41.4994C417.9 41.2994 417.6 40.8994 417.6 40.3994V6.39941H403.8V96.1994H417.6V89.8994C417.6 89.3994 417.9 88.9994 418.4 88.7994ZM417 64.9994C417 53.5994 425.6 44.6994 436.6 44.6994C447.6 44.6994 456.2 53.5994 456.2 64.9994C456.2 76.3994 447.6 85.2994 436.6 85.2994C425.6 85.2994 417 76.2994 417 64.9994Z" fill="white"/>
+          <path d="M510.1 46.4994C511.4 46.4994 512.6 46.5994 513.4 46.7994V32.5994C512.9 32.4994 512 32.3994 511.1 32.3994C503.9 32.3994 497.3 36.0994 493.8 41.9994C493.5 42.4994 493 42.6994 492.5 42.4994C492 42.3994 491.6 41.8994 491.6 41.3994V33.6994H477.9V96.2994H491.7V68.6994C491.7 54.9994 498.7 46.4994 510.1 46.4994Z" fill="white"/>
+          <path d="M536.1 33.6992H522.1V96.2992H536.1V33.6992Z" fill="white"/>
+          <path d="M528.9 6.49902C524.2 6.49902 520.4 10.299 520.4 14.999C520.4 19.699 524.2 23.499 528.9 23.499C533.6 23.499 537.4 19.699 537.4 14.999C537.4 10.299 533.6 6.49902 528.9 6.49902Z" fill="white"/>
+          <path d="M577.1 32.0996C557.9 32.0996 544 45.8996 544 64.9996C544 74.2996 547.3 82.5996 553.2 88.5996C559.2 94.5996 567.6 97.8996 577 97.8996C584.8 97.8996 590.8 96.3996 602.2 87.9996L594.3 79.6996C588.7 83.3996 583.5 85.1996 578.4 85.1996C566.8 85.1996 558.1 76.4996 558.1 64.9996C558.1 53.4996 566.8 44.7996 578.4 44.7996C583.9 44.7996 589 46.5996 594.1 50.2996L602.9 41.9996C592.6 33.1996 583.3 32.0996 577.1 32.0996Z" fill="white"/>
+          <path d="M626.5 68.699C626.7 68.499 627 68.399 627.3 68.399H627.4C627.7 68.399 628 68.599 628.3 68.799L650.4 96.199H667.4L638.8 61.599C638.4 61.099 638.4 60.399 638.9 59.999L665.2 33.699H648.3L625.6 56.499C625.3 56.799 624.8 56.899 624.3 56.799C623.9 56.599 623.6 56.199 623.6 55.699V6.49902H609.7V96.299H623.5V71.899C623.5 71.599 623.6 71.199 623.9 70.999L626.5 68.699Z" fill="white"/>
+          <path d="M689.9 97.799C701.2 97.799 712.7 90.899 712.7 77.799C712.7 69.199 707.3 63.299 696.3 59.699L688.8 57.199C683.7 55.499 681.3 53.099 681.3 49.799C681.3 45.999 684.7 43.399 689.5 43.399C694.1 43.399 698.2 46.399 700.8 51.599L711.9 45.599C707.8 37.199 699.3 31.999 689.5 31.999C677.1 31.999 668.1 39.999 668.1 50.899C668.1 59.599 673.3 65.399 684 68.799L691.7 71.299C697.1 72.999 699.4 75.199 699.4 78.699C699.4 83.999 694.5 85.899 690.3 85.899C684.7 85.899 679.7 82.299 677.3 76.399L666 82.399C669.7 91.899 678.8 97.799 689.9 97.799Z" fill="white"/>
+        </g>
+        <defs><clipPath id="clip0_dark_title"><rect width="712.8" height="113" fill="white"/></clipPath></defs>
+      </svg>
+      <h1>Agents on Apps Workshop</h1>
+      <div class="accent-line" style="margin: 1rem auto;"></div>
+      <p class="subtitle">Build, Test & Deploy AI Agents on Databricks</p>
+      <p style="margin-top: 2rem; font-family: var(--font-mono); font-size: 0.85rem; color: rgba(255,255,255,0.4);">LangGraph + MCP + MLflow AgentServer + Asset Bundles</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: What is an Agent on an App -->
+  <section class="slide slide-light" aria-label="Slide 2: What is an Agent on an App">
+    <div class="slide-content">
+      <div class="section-label">Overview</div>
+      <h2>What is an Agent on an App?</h2>
+      <div class="accent-line"></div>
+      <p style="max-width: 700px; margin-bottom: 1rem;">An AI agent deployed as a <strong>Databricks App</strong> instead of a Model Serving endpoint. Develop locally, deploy with a single command.</p>
+      <div class="card-grid card-grid-4" style="margin-top: 1.5rem;">
+        <div class="card">
+          <div class="card-icon">&#9889;</div>
+          <h3>FastAPI Backend</h3>
+          <p>MLflow AgentServer wraps your agent in a production FastAPI app with <span class="inline-code">/invocations</span> endpoint</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128172;</div>
+          <h3>Built-in Chat UI</h3>
+          <p>Next.js chat interface included out of the box. Or bring your own frontend.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128736;</div>
+          <h3>Local-First Dev</h3>
+          <p>Hot-reload, test locally, iterate fast on your laptop before deploying</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128202;</div>
+          <h3>Auto Tracing</h3>
+          <p>Every interaction traced to MLflow for observability and debugging</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Architecture Diagram -->
+  <section class="slide slide-dark" aria-label="Slide 3: Architecture">
+    <div class="slide-content">
+      <div class="section-label">Architecture</div>
+      <h2 style="text-align:center;">How It All Fits Together</h2>
+      <div class="accent-line" style="margin: 1rem auto;"></div>
+      <div class="diagram">
+        <div class="diagram-row">
+          <div class="diagram-node primary" style="min-width: 200px;">Chat UI<br><span style="font-size:0.75rem;opacity:0.8">Next.js on port 8000</span></div>
+        </div>
+        <div class="diagram-connector"></div>
+        <div class="diagram-row">
+          <div class="diagram-node accent" style="min-width: 300px;">MLflow AgentServer (FastAPI)<br><span style="font-size:0.75rem;opacity:0.8">/invocations endpoint</span></div>
+        </div>
+        <div class="diagram-connector"></div>
+        <div class="diagram-row">
+          <div class="diagram-node outline" style="min-width: 260px;">Your Agent Code<br><span style="font-size:0.75rem;opacity:0.8">@invoke() / @stream()</span></div>
+        </div>
+        <div class="diagram-connector"></div>
+        <div class="diagram-row" style="gap: 1.5rem;">
+          <div class="diagram-node indigo">LLM Endpoint<br><span style="font-size:0.7rem;opacity:0.8">Claude, GPT, etc.</span></div>
+          <div class="diagram-node green">MCP Servers<br><span style="font-size:0.7rem;opacity:0.8">Code Exec, SQL</span></div>
+          <div class="diagram-node amber">Custom Tools<br><span style="font-size:0.7rem;opacity:0.8">@tool functions</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Dev Workflow -->
+  <section class="slide slide-white" aria-label="Slide 4: Development Workflow">
+    <div class="slide-content">
+      <div class="section-label">Developer Experience</div>
+      <h2>Local Development Workflow</h2>
+      <div class="accent-line"></div>
+      <div class="timeline" style="margin-top: 2rem;">
+        <div class="timeline-item">
+          <h4>1. Authenticate</h4>
+          <p><span class="inline-code">databricks auth login</span></p>
+        </div>
+        <div class="timeline-item">
+          <h4>2. Configure</h4>
+          <p><span class="inline-code">cp .env.example .env.local</span> &mdash; set experiment ID & profile</p>
+        </div>
+        <div class="timeline-item">
+          <h4>3. Install</h4>
+          <p><span class="inline-code">uv sync</span> &mdash; install Python dependencies</p>
+        </div>
+        <div class="timeline-item">
+          <h4>4. Run</h4>
+          <p><span class="inline-code">uv run start-app</span> &mdash; backend + chat UI at localhost:8000</p>
+        </div>
+        <div class="timeline-item">
+          <h4>5. Iterate</h4>
+          <p><span class="inline-code">uv run start-server --reload</span> &mdash; hot-reload on save</p>
+        </div>
+        <div class="timeline-item">
+          <h4>6. Test via API</h4>
+          <p><span class="inline-code">curl -X POST localhost:8000/invocations -d '{"input": [...]}'</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Deployment Overview -->
+  <section class="slide slide-ink" aria-label="Slide 5: Three Deployment Methods">
+    <div class="slide-content" style="text-align: center;">
+      <div class="section-label">Deployment</div>
+      <h2>Three Ways to Deploy</h2>
+      <div class="accent-line" style="margin: 1rem auto;"></div>
+      <p style="color: rgba(255,255,255,0.6); max-width: 700px; margin: 0 auto 1.5rem;">Every chapter supports all three methods. Choose the one that fits your workflow.</p>
+      <div class="card-grid card-grid-3" style="text-align: left; max-width: 950px; margin: 0 auto;">
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-amber">Workspace UI</span></div>
+          <h3 style="color: white;">Point &amp; Click</h3>
+          <p style="color: rgba(255,255,255,0.7);">Create app, add resources, and deploy through the Databricks console. No CLI required.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Exploration, first-time setup</p>
+        </div>
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-lava">CLI Commands</span></div>
+          <h3 style="color: white;">Three Commands</h3>
+          <p style="color: rgba(255,255,255,0.7);"><span class="inline-code">create</span> &rarr; <span class="inline-code">sync</span> &rarr; <span class="inline-code">deploy</span>. Scriptable and fast. Resources configured in UI.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Development, scripting, CI/CD</p>
+        </div>
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-green">Asset Bundles</span></div>
+          <h3 style="color: white;">One Command</h3>
+          <p style="color: rgba(255,255,255,0.7);"><span class="inline-code">databricks bundle deploy</span>. App, resources, permissions &mdash; all declared in YAML.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Production, multi-environment</p>
+        </div>
+      </div>
+      <p style="margin-top: 2rem; color: rgba(255,255,255,0.45); font-size: 0.9rem;">All methods require <strong style="color: rgba(255,255,255,0.7);">OAuth tokens</strong> (not PATs) &mdash; use <span class="inline-code" style="color: rgba(255,255,255,0.6);">databricks auth token</span></p>
+    </div>
+  </section>
+
+  <!-- Slide 6: Deploy from UI -->
+  <section class="slide slide-white" aria-label="Slide 6: Deploy from Workspace UI">
+    <div class="slide-content">
+      <div class="section-label">Deployment &mdash; Option A</div>
+      <h2>Deploy from Workspace UI</h2>
+      <div class="accent-line"></div>
+      <div class="two-col" style="margin-top: 1.5rem;">
+        <div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <h4>1. Create App</h4>
+              <p><strong>Compute &gt; Apps &gt; Create App</strong>. Enter a name and source code path.</p>
+            </div>
+            <div class="timeline-item">
+              <h4>2. Add Resources</h4>
+              <p>Click <strong>Add Resource</strong> for each dependency:</p>
+            </div>
+            <div class="timeline-item">
+              <h4>3. Configure Env Vars</h4>
+              <p>Add <span class="inline-code">LAKEBASE_INSTANCE_NAME</span> or other app-specific variables.</p>
+            </div>
+            <div class="timeline-item">
+              <h4>4. Deploy</h4>
+              <p>Upload source code and click <strong>Deploy</strong>. The UI creates a service principal automatically.</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 1rem;">Resources to Add</h3>
+          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="tag tag-teal">Experiment</span>
+              <span>MLflow experiment &rarr; <span class="inline-code">CAN_MANAGE</span></span>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="tag tag-lava">Endpoint</span>
+              <span><span class="inline-code">databricks-claude-sonnet-4-5</span> &rarr; <span class="inline-code">CAN_QUERY</span></span>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom: 0.75rem; padding: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="tag tag-green">Database</span>
+              <span>Lakebase &rarr; <span class="inline-code">CAN_CONNECT_AND_CREATE</span></span>
+            </div>
+          </div>
+          <div class="card" style="padding: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="tag tag-amber">Endpoint</span>
+              <span><span class="inline-code">databricks-gte-large-en</span> &rarr; <span class="inline-code">CAN_QUERY</span></span>
+            </div>
+          </div>
+          <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">Resource list varies by chapter. Ch 2-4 need only the experiment and LLM endpoint.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7: Deploy from CLI -->
+  <section class="slide slide-dark" aria-label="Slide 7: Deploy from CLI">
+    <div class="slide-content">
+      <div class="section-label">Deployment &mdash; Option B</div>
+      <h2>Deploy from CLI</h2>
+      <div class="accent-line"></div>
+      <p style="color: rgba(255,255,255,0.7); max-width: 700px;">Three commands to go from local code to a live app. Uses <span class="inline-code">app.yaml</span> for runtime config, resource permissions set in the UI.</p>
+      <div class="two-col" style="margin-top: 1rem; gap: 2.5rem;">
+        <div>
+          <div class="code-block" style="font-size: 0.72rem; padding: 1.25rem;"><span class="comment"># 1. Create the app</span>
+databricks apps create my-agent
+
+<span class="comment"># 2. Sync source code to workspace</span>
+USER=$(databricks current-user me | jq -r .userName)
+databricks sync . <span class="string">"/Users/$USER/my-agent"</span>
+
+<span class="comment"># 3. Deploy</span>
+databricks apps deploy my-agent \
+  --source-code-path <span class="string">/Workspace/Users/$USER/my-agent</span>
+
+<span class="comment"># 4. Query (OAuth token required, not PAT)</span>
+databricks auth token
+curl -X POST &lt;app-url&gt;/invocations \
+  -H <span class="string">"Authorization: Bearer &lt;token&gt;"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"input": [{"role": "user",
+    "content": "Hello!"}], "stream": true}'</span></div>
+        </div>
+        <div>
+          <h3 style="color: white; margin-bottom: 0.5rem;">app.yaml</h3>
+          <div class="code-block" style="font-size: 0.72rem; padding: 1.25rem;"><span class="type">command</span>: [<span class="string">"uv"</span>, <span class="string">"run"</span>, <span class="string">"start-app"</span>]
+
+<span class="type">env</span>:
+  - <span class="type">name</span>: MLFLOW_TRACKING_URI
+    <span class="type">value</span>: <span class="string">"databricks"</span>
+  - <span class="type">name</span>: MLFLOW_EXPERIMENT_ID
+    <span class="type">valueFrom</span>: <span class="string">"experiment"</span>
+  - <span class="type">name</span>: LAKEBASE_INSTANCE_NAME
+    <span class="type">value</span>: <span class="string">"my-lakebase"</span></div>
+          <div style="margin-top: 1rem;">
+            <h3 style="color: white; margin-bottom: 0.5rem;">After <span class="inline-code" style="font-size: 0.9em;">apps create</span>, add resources in UI:</h3>
+            <ul class="bullet-list" style="font-size: 0.9rem;">
+              <li>MLflow Experiment &rarr; <span class="inline-code">CAN_MANAGE</span></li>
+              <li>Serving Endpoint &rarr; <span class="inline-code">CAN_QUERY</span></li>
+              <li>Lakebase Database &rarr; <span class="inline-code">CAN_CONNECT_AND_CREATE</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: Deploy from Asset Bundles -->
+  <section class="slide slide-light" aria-label="Slide 8: Deploy from Asset Bundles">
+    <div class="slide-content">
+      <div class="section-label">Deployment &mdash; Option C</div>
+      <h2>Deploy from Asset Bundles</h2>
+      <div class="accent-line" style="margin: 0.5rem 0;"></div>
+      <p style="max-width: 750px;">One <span class="inline-code">databricks.yml</span> declares the app, resources, permissions, and environments. One command deploys everything.</p>
+      <div class="two-col" style="margin-top: 0.5rem; gap: 2rem;">
+        <div>
+          <div class="code-block" style="font-size: 0.64rem; padding: 1rem; line-height: 1.5;"><span class="comment"># databricks.yml</span>
+<span class="type">bundle</span>:
+  name: agents-workshop
+
+<span class="type">resources</span>:
+  <span class="type">apps</span>:
+    agent_app:
+      name: workshop-${var.suffix}
+      source_code_path: .
+      <span class="type">config</span>:
+        command: [<span class="string">"uv"</span>, <span class="string">"run"</span>, <span class="string">"start-app"</span>]
+        env:
+          - name: LAKEBASE_INSTANCE_NAME
+            value: ${var.lakebase}
+      <span class="type">resources</span>:
+        - name: llm
+          serving_endpoint:
+            name: databricks-claude-sonnet-4-5
+            permission: CAN_QUERY
+        - name: database
+          database:
+            instance_name: ${var.lakebase}
+            permission: CAN_CONNECT_AND_CREATE
+      <span class="type">permissions</span>:
+        - level: CAN_USE
+          group_name: users
+
+<span class="type">targets</span>:
+  dev:
+    mode: development
+    default: <span class="keyword">true</span>
+  prod:
+    mode: production</div>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 0.5rem;">Deploy Commands</h3>
+          <div class="code-block" style="font-size: 0.7rem; padding: 1rem; line-height: 1.5;"><span class="comment"># Validate YAML syntax</span>
+databricks bundle validate
+
+<span class="comment"># Deploy to dev (default target)</span>
+databricks bundle deploy
+
+<span class="comment"># Deploy to staging or production</span>
+databricks bundle deploy -t staging
+databricks bundle deploy -t prod
+
+<span class="comment"># Check status / tear down</span>
+databricks bundle summary
+databricks bundle destroy</div>
+          <h3 style="margin-top: 0.75rem; margin-bottom: 0.4rem;">What the bundle handles</h3>
+          <ul class="bullet-list" style="font-size: 0.88rem;">
+            <li>Creates app and grants SP permissions</li>
+            <li>Syncs source code to workspace</li>
+            <li>Multi-target: dev / staging / prod</li>
+            <li>Variables avoid name collisions per user</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Key Components -->
+  <section class="slide slide-white" aria-label="Slide 9: Key Components">
+    <div class="slide-content">
+      <div class="section-label">Core Stack</div>
+      <h2>Key Components</h2>
+      <div class="accent-line"></div>
+      <div class="card-grid card-grid-3" style="margin-top: 1.5rem;">
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-lava">MLflow</span></div>
+          <h3>AgentServer</h3>
+          <p>Wraps your agent in FastAPI. Register handlers with <span class="inline-code">@invoke()</span> and <span class="inline-code">@stream()</span> decorators. Auto-traces everything.</p>
+        </div>
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-teal">LangGraph</span></div>
+          <h3>Agent Orchestration</h3>
+          <p>Stateful, multi-step agents that decide which tools to call and when. Built on LangChain for LLM and tool integration.</p>
+        </div>
+        <div class="card">
+          <div style="margin-bottom: 0.75rem;"><span class="tag tag-green">Databricks</span></div>
+          <h3>ChatDatabricks</h3>
+          <p>Access Databricks-hosted Foundation Models. Works locally with CLI auth and in production with the app's service principal.</p>
+        </div>
+      </div>
+      <div class="code-block" style="margin-top: 1.5rem; font-size: 0.78rem;"><span class="comment"># The three imports that power your agent</span>
+<span class="keyword">from</span> databricks_langchain <span class="keyword">import</span> <span class="type">ChatDatabricks</span>
+<span class="keyword">from</span> langchain.agents <span class="keyword">import</span> <span class="func">create_agent</span>
+<span class="keyword">from</span> mlflow.genai.agent_server <span class="keyword">import</span> <span class="func">invoke</span>, <span class="func">stream</span></div>
+    </div>
+  </section>
+
+  <!-- Slide 10: Chapter 2 - Hello Agent -->
+  <section class="slide slide-dark" aria-label="Slide 10: Chapter 2 Hello Agent">
+    <div class="slide-content">
+      <div class="section-label">Chapter 2</div>
+      <h2>Hello Agent: Custom Tools</h2>
+      <div class="accent-line"></div>
+      <p style="color: rgba(255,255,255,0.7); max-width: 600px;">Define tools as simple Python functions. The LLM reads the docstring to decide when to call each one.</p>
+      <div class="two-col" style="margin-top: 1.5rem;">
+        <div>
+          <div class="code-block" style="font-size: 0.75rem;"><span class="decorator">@tool</span>
+<span class="keyword">def</span> <span class="func">get_current_time</span>() -> str:
+    <span class="string">"""Get the current date and time."""</span>
+    <span class="keyword">return</span> datetime.now().strftime(<span class="string">"%Y-%m-%d %H:%M:%S"</span>)
+
+
+<span class="decorator">@tool</span>
+<span class="keyword">def</span> <span class="func">calculate</span>(expression: str) -> str:
+    <span class="string">"""Evaluate a math expression."""</span>
+    result = eval(expression,
+        {<span class="string">"__builtins__"</span>: {}}, {})
+    <span class="keyword">return</span> str(result)</div>
+        </div>
+        <div>
+          <div class="code-block" style="font-size: 0.75rem;"><span class="comment"># Create the agent</span>
+TOOLS = [get_current_time, calculate]
+MODEL = <span class="type">ChatDatabricks</span>(
+    endpoint=<span class="string">"databricks-claude-sonnet-4"</span>
+)
+
+<span class="keyword">def</span> <span class="func">init_agent</span>():
+    <span class="keyword">return</span> <span class="func">create_agent</span>(
+        tools=TOOLS,
+        model=MODEL
+    )</div>
+          <div style="margin-top: 1.5rem;">
+            <h3 style="color: white;">Try it:</h3>
+            <ul class="bullet-list" style="margin-top: 0.5rem;">
+              <li>"What time is it?"</li>
+              <li>"What is 42 * 17?"</li>
+              <li>"Tell me a joke"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 11: @invoke and @stream -->
+  <section class="slide slide-ink" aria-label="Slide 11: invoke and stream decorators">
+    <div class="slide-content">
+      <div class="section-label">The Server Contract</div>
+      <h2>@invoke() and @stream()</h2>
+      <div class="accent-line"></div>
+      <p style="color: rgba(255,255,255,0.7); max-width: 700px;">These decorators register your agent functions with the MLflow AgentServer. It handles the REST API, auth, and tracing.</p>
+      <div class="code-block" style="margin-top: 1.5rem; font-size: 0.78rem;"><span class="decorator">@invoke()</span>
+<span class="keyword">async def</span> <span class="func">non_streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">ResponsesAgentResponse</span>:
+    <span class="string">"""Called for non-streaming requests."""</span>
+    outputs = [event.item <span class="keyword">async for</span> event <span class="keyword">in</span> streaming(request)
+               <span class="keyword">if</span> event.type == <span class="string">"response.output_item.done"</span>]
+    <span class="keyword">return</span> <span class="type">ResponsesAgentResponse</span>(output=outputs)
+
+
+<span class="decorator">@stream()</span>
+<span class="keyword">async def</span> <span class="func">streaming</span>(request: <span class="type">ResponsesAgentRequest</span>) -> <span class="type">AsyncGenerator</span>:
+    <span class="string">"""Called for streaming requests. Yields events in real time."""</span>
+    agent = <span class="keyword">await</span> init_agent()
+    messages = {<span class="string">"messages"</span>: to_chat_completions_input(request.input)}
+
+    <span class="keyword">async for</span> event <span class="keyword">in</span> process_agent_astream_events(
+        agent.astream(input=messages, stream_mode=[<span class="string">"updates"</span>, <span class="string">"messages"</span>])
+    ):
+        <span class="keyword">yield</span> event</div>
+    </div>
+  </section>
+
+  <!-- Slide 12: Chapter 3 - MCP -->
+  <section class="slide slide-light" aria-label="Slide 12: Chapter 3 MCP Integration">
+    <div class="slide-content">
+      <div class="section-label">Chapter 3</div>
+      <h2>MCP Server Integration</h2>
+      <div class="accent-line"></div>
+      <div class="two-col">
+        <div>
+          <h3 style="margin-bottom: 0.75rem;">What is MCP?</h3>
+          <p style="margin-bottom: 1rem;"><strong>Model Context Protocol</strong> standardizes how agents discover and use tools. Like a USB port for AI tools.</p>
+          <h3 style="margin-bottom: 0.75rem;">Built-in Databricks MCP Servers</h3>
+          <ul class="bullet-list">
+            <li><span class="inline-code">system.ai</span> &mdash; Python code interpreter</li>
+            <li><span class="inline-code">sql</span> &mdash; Query SQL warehouses</li>
+            <li><span class="inline-code">vector-search</span> &mdash; Search indexes</li>
+            <li><span class="inline-code">genie</span> &mdash; NL data exploration</li>
+            <li><span class="inline-code">functions</span> &mdash; UC Functions</li>
+          </ul>
+        </div>
+        <div>
+          <div class="code-block" style="font-size: 0.75rem;"><span class="keyword">from</span> databricks_langchain <span class="keyword">import</span> (
+    <span class="type">DatabricksMCPServer</span>,
+    <span class="type">DatabricksMultiServerMCPClient</span>,
+)
+
+<span class="keyword">def</span> <span class="func">init_mcp_client</span>():
+    <span class="keyword">return</span> <span class="type">DatabricksMultiServerMCPClient</span>([
+        <span class="type">DatabricksMCPServer</span>(
+            name=<span class="string">"system-ai"</span>,
+            url=f<span class="string">"{host}/api/2.0/mcp/</span>
+<span class="string">                 functions/system/ai"</span>,
+        ),
+    ])
+
+<span class="keyword">async def</span> <span class="func">init_agent</span>():
+    mcp_tools = <span class="keyword">await</span> client.get_tools()
+    all_tools = CUSTOM + mcp_tools
+    <span class="keyword">return</span> <span class="func">create_agent</span>(
+        tools=all_tools, model=MODEL
+    )</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 13: Chapter 5 - Memory -->
+  <section class="slide slide-light" aria-label="Slide 13: Chapter 5 Agent Memory">
+    <div class="slide-content">
+      <div class="section-label">Chapter 5</div>
+      <h2>Short-Term &amp; Long-Term Memory</h2>
+      <div class="accent-line"></div>
+      <p style="max-width: 700px; margin-bottom: 1rem;">Add <strong>conversation history</strong> and <strong>persistent user knowledge</strong> backed by Lakebase (managed Postgres).</p>
+      <div class="two-col">
+        <div>
+          <div class="card" style="margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <span class="tag tag-teal">Short-Term</span>
+            </div>
+            <h3>Conversation History</h3>
+            <p><span class="inline-code">AsyncCheckpointSaver</span> persists messages per thread ID. The agent remembers what was said earlier in the session.</p>
+          </div>
+          <div class="card">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <span class="tag tag-green">Long-Term</span>
+            </div>
+            <h3>User Knowledge</h3>
+            <p><span class="inline-code">AsyncDatabricksStore</span> with semantic search. Facts persist across sessions &mdash; preferences, role, projects.</p>
+          </div>
+        </div>
+        <div>
+          <div class="code-block" style="font-size: 0.72rem;"><span class="comment"># Both backed by Lakebase</span>
+<span class="keyword">async with</span> <span class="type">AsyncCheckpointSaver</span>(
+    instance_name=LAKEBASE
+) <span class="keyword">as</span> checkpointer:
+    <span class="keyword">async with</span> <span class="type">AsyncDatabricksStore</span>(
+        instance_name=LAKEBASE,
+        embedding_endpoint=<span class="string">"databricks-gte-large-en"</span>,
+        embedding_dims=<span class="string">1024</span>,
+    ) <span class="keyword">as</span> store:
+        agent = <span class="keyword">await</span> init_agent(
+            checkpointer=checkpointer,
+            store=store,
+        )</div>
+          <div style="margin-top: 1rem;">
+            <ul class="bullet-list">
+              <li>Thread-based conversation history</li>
+              <li>Semantic search for user facts</li>
+              <li>Memory tools: save, get, delete</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 14: Summary / Next Steps -->
+  <section class="slide slide-dark" aria-label="Slide 14: Summary">
+    <div class="slide-content" style="text-align: center;">
+      <svg class="db-logo" viewBox="0 0 713 113" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Databricks" style="height: 32px; margin-bottom: 2rem;">
+        <g clip-path="url(#clip0_dark_close)">
+          <path d="M98.9 46.5996L52.3 72.8996L2.4 44.7996L0 46.0996V66.4996L52.3 95.8996L98.9 69.6996V80.4996L52.3 106.8L2.4 78.6996L0 79.9996V83.4996L52.3 112.9L104.5 83.4996V63.0996L102.1 61.7996L52.3 89.7996L5.6 63.5996V52.7996L52.3 78.9996L104.5 49.5996V29.4996L101.9 27.9996L52.3 55.8996L8 31.0996L52.3 6.19961L88.7 26.6996L91.9 24.8996V22.3996L52.3 0.0996094L0 29.4996V32.6996L52.3 62.0996L98.9 35.7996V46.5996Z" fill="#FF3621"/>
+          <path d="M202.2 96.1994V6.39941H188.4V39.9994C188.4 40.4994 188.1 40.8994 187.6 41.0994C187.1 41.2994 186.6 41.0994 186.3 40.7994C181.6 35.2994 174.3 32.1994 166.3 32.1994C149.2 32.1994 135.8 46.5994 135.8 64.9994C135.8 73.9994 138.9 82.2994 144.6 88.3994C150.3 94.4994 158 97.7994 166.3 97.7994C174.2 97.7994 181.5 94.4994 186.3 88.7994C186.6 88.3994 187.2 88.2994 187.6 88.3994C188.1 88.5994 188.4 88.9994 188.4 89.4994V96.1994H202.2ZM169.3 85.2994C158.3 85.2994 149.7 76.3994 149.7 64.9994C149.7 53.5994 158.3 44.6994 169.3 44.6994C180.3 44.6994 188.9 53.5994 188.9 64.9994C188.9 76.3994 180.3 85.2994 169.3 85.2994Z" fill="white"/>
+          <path d="M276 96.0996V33.6996H262.3V39.9996C262.3 40.4996 262 40.8996 261.5 41.0996C261 41.2996 260.5 41.0996 260.2 40.6996C255.6 35.1996 248.4 32.0996 240.2 32.0996C223.1 32.0996 209.7 46.4996 209.7 64.8996C209.7 83.2996 223.1 97.6996 240.2 97.6996C248.1 97.6996 255.4 94.3996 260.2 88.5996C260.5 88.1996 261.1 88.0996 261.5 88.1996C262 88.3996 262.3 88.7996 262.3 89.2996V96.0996H276ZM243.3 85.2996C232.3 85.2996 223.7 76.3996 223.7 64.9996C223.7 53.5996 232.3 44.6996 243.3 44.6996C254.3 44.6996 262.9 53.5996 262.9 64.9996C262.9 76.3996 254.3 85.2996 243.3 85.2996Z" fill="white"/>
+          <path d="M314.4 97.1994C318.8 97.1994 322.7 96.7994 324.9 96.4994V84.4994C323.1 84.6994 319.9 84.8994 318 84.8994C312.4 84.8994 308.1 83.8994 308.1 71.7994V46.0994C308.1 45.3994 308.6 44.8994 309.3 44.8994H322.8V33.5994H309.3C308.6 33.5994 308.1 33.0994 308.1 32.3994V14.3994H294.3V32.4994C294.3 33.1994 293.8 33.6994 293.1 33.6994H283.5V44.9994H293.1C293.8 44.9994 294.3 45.4994 294.3 46.1994V75.2994C294.3 97.1994 308.9 97.1994 314.4 97.1994Z" fill="white"/>
+          <path d="M393.3 96.1996V33.6996H379.6V39.9996C379.6 40.4996 379.3 40.8996 378.8 41.0996C378.3 41.2996 377.8 41.0996 377.5 40.6996C372.9 35.1996 365.7 32.0996 357.5 32.0996C340.3 32.0996 327 46.4996 327 64.9996C327 83.4996 340.4 97.7996 357.5 97.7996C365.4 97.7996 372.7 94.4996 377.5 88.6996C377.8 88.2996 378.4 88.1996 378.8 88.2996C379.3 88.4996 379.6 88.8996 379.6 89.3996V96.1996H393.3ZM360.6 85.2996C349.6 85.2996 341 76.3996 341 64.9996C341 53.5996 349.6 44.6996 360.6 44.6996C371.6 44.6996 380.2 53.5996 380.2 64.9996C380.2 76.3996 371.6 85.2996 360.6 85.2996Z" fill="white"/>
+          <path d="M418.4 88.7994C418.5 88.7994 418.7 88.6994 418.8 88.6994C419.1 88.6994 419.5 88.8994 419.7 89.0994C424.4 94.5994 431.7 97.6994 439.7 97.6994C456.8 97.6994 470.2 83.2994 470.2 64.8994C470.2 55.8994 467.1 47.5994 461.4 41.4994C455.7 35.3994 448 32.0994 439.7 32.0994C431.8 32.0994 424.5 35.3994 419.7 41.0994C419.4 41.4994 418.9 41.5994 418.4 41.4994C417.9 41.2994 417.6 40.8994 417.6 40.3994V6.39941H403.8V96.1994H417.6V89.8994C417.6 89.3994 417.9 88.9994 418.4 88.7994ZM417 64.9994C417 53.5994 425.6 44.6994 436.6 44.6994C447.6 44.6994 456.2 53.5994 456.2 64.9994C456.2 76.3994 447.6 85.2994 436.6 85.2994C425.6 85.2994 417 76.2994 417 64.9994Z" fill="white"/>
+          <path d="M510.1 46.4994C511.4 46.4994 512.6 46.5994 513.4 46.7994V32.5994C512.9 32.4994 512 32.3994 511.1 32.3994C503.9 32.3994 497.3 36.0994 493.8 41.9994C493.5 42.4994 493 42.6994 492.5 42.4994C492 42.3994 491.6 41.8994 491.6 41.3994V33.6994H477.9V96.2994H491.7V68.6994C491.7 54.9994 498.7 46.4994 510.1 46.4994Z" fill="white"/>
+          <path d="M536.1 33.6992H522.1V96.2992H536.1V33.6992Z" fill="white"/>
+          <path d="M528.9 6.49902C524.2 6.49902 520.4 10.299 520.4 14.999C520.4 19.699 524.2 23.499 528.9 23.499C533.6 23.499 537.4 19.699 537.4 14.999C537.4 10.299 533.6 6.49902 528.9 6.49902Z" fill="white"/>
+          <path d="M577.1 32.0996C557.9 32.0996 544 45.8996 544 64.9996C544 74.2996 547.3 82.5996 553.2 88.5996C559.2 94.5996 567.6 97.8996 577 97.8996C584.8 97.8996 590.8 96.3996 602.2 87.9996L594.3 79.6996C588.7 83.3996 583.5 85.1996 578.4 85.1996C566.8 85.1996 558.1 76.4996 558.1 64.9996C558.1 53.4996 566.8 44.7996 578.4 44.7996C583.9 44.7996 589 46.5996 594.1 50.2996L602.9 41.9996C592.6 33.1996 583.3 32.0996 577.1 32.0996Z" fill="white"/>
+          <path d="M626.5 68.699C626.7 68.499 627 68.399 627.3 68.399H627.4C627.7 68.399 628 68.599 628.3 68.799L650.4 96.199H667.4L638.8 61.599C638.4 61.099 638.4 60.399 638.9 59.999L665.2 33.699H648.3L625.6 56.499C625.3 56.799 624.8 56.899 624.3 56.799C623.9 56.599 623.6 56.199 623.6 55.699V6.49902H609.7V96.299H623.5V71.899C623.5 71.599 623.6 71.199 623.9 70.999L626.5 68.699Z" fill="white"/>
+          <path d="M689.9 97.799C701.2 97.799 712.7 90.899 712.7 77.799C712.7 69.199 707.3 63.299 696.3 59.699L688.8 57.199C683.7 55.499 681.3 53.099 681.3 49.799C681.3 45.999 684.7 43.399 689.5 43.399C694.1 43.399 698.2 46.399 700.8 51.599L711.9 45.599C707.8 37.199 699.3 31.999 689.5 31.999C677.1 31.999 668.1 39.999 668.1 50.899C668.1 59.599 673.3 65.399 684 68.799L691.7 71.299C697.1 72.999 699.4 75.199 699.4 78.699C699.4 83.999 694.5 85.899 690.3 85.899C684.7 85.899 679.7 82.299 677.3 76.399L666 82.399C669.7 91.899 678.8 97.799 689.9 97.799Z" fill="white"/>
+        </g>
+        <defs><clipPath id="clip0_dark_close"><rect width="712.8" height="113" fill="white"/></clipPath></defs>
+      </svg>
+      <h2>What You've Learned</h2>
+      <div class="accent-line" style="margin: 1rem auto;"></div>
+      <div class="card-grid card-grid-3" style="margin-top: 2rem; text-align: left;">
+        <div class="card">
+          <h3 style="color: white;">Ch 1: Concepts</h3>
+          <p style="color: rgba(255,255,255,0.6);">Architecture, AgentServer, auth patterns</p>
+        </div>
+        <div class="card">
+          <h3 style="color: white;">Ch 2: Custom Tools</h3>
+          <p style="color: rgba(255,255,255,0.6);">@tool decorators, LangGraph agent, local testing</p>
+        </div>
+        <div class="card">
+          <h3 style="color: white;">Ch 3: MCP</h3>
+          <p style="color: rgba(255,255,255,0.6);">MCP servers, code interpreter, tool discovery</p>
+        </div>
+      </div>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; text-align: left; max-width: 740px; margin-left: auto; margin-right: auto;">
+        <div class="card">
+          <h3 style="color: white;">Ch 4: Deploy</h3>
+          <p style="color: rgba(255,255,255,0.6);">UI, CLI &amp; Asset Bundles &mdash; three ways to ship</p>
+        </div>
+        <div class="card">
+          <h3 style="color: white;">Ch 5: Memory</h3>
+          <p style="color: rgba(255,255,255,0.6);">Conversation history &amp; persistent user knowledge via Lakebase</p>
+        </div>
+      </div>
+      <div style="margin-top: 2rem;">
+        <h3 style="color: var(--db-lava); margin-bottom: 1rem;">Next Steps</h3>
+        <p style="color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto;">Add SQL &amp; Vector Search MCP servers &bull; Build custom MCP servers with FastMCP &bull; Add OBO auth for per-user data access &bull; Create evaluation datasets &bull; Deploy to production with Asset Bundles</p>
+      </div>
+      <p style="margin-top: 2.5rem; font-family: var(--font-mono); font-size: 0.8rem; color: rgba(255,255,255,0.3);">github.com/natefleming/agents-on-apps-workshop</p>
+    </div>
+  </section>
+
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.progressBar = document.querySelector('.progress-bar');
+        this.navDots = document.querySelector('.nav-dots');
+        this.currentSlide = 0;
+        this.init();
+      }
+      init() { this.createNavDots(); this.setupIntersectionObserver(); this.setupKeyboardNav(); this.setupTouchNav(); this.setupWheelNav(); this.updateProgress(); }
+      createNavDots() { this.slides.forEach((_, i) => { const dot = document.createElement('button'); dot.className = 'nav-dot' + (i === 0 ? ' active' : ''); dot.setAttribute('aria-label', `Go to slide ${i + 1}`); dot.addEventListener('click', () => this.goToSlide(i)); this.navDots.appendChild(dot); }); }
+      setupIntersectionObserver() { const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); const index = [...this.slides].indexOf(entry.target); this.currentSlide = index; this.updateDots(); this.updateProgress(); } }); }, { threshold: 0.5 }); this.slides.forEach(slide => observer.observe(slide)); }
+      setupKeyboardNav() { document.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.goToSlide(this.currentSlide + 1); } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); this.goToSlide(this.currentSlide - 1); } }); }
+      setupTouchNav() { let startY = 0; document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true }); document.addEventListener('touchend', (e) => { const diff = startY - e.changedTouches[0].clientY; if (Math.abs(diff) > 50) { this.goToSlide(this.currentSlide + (diff > 0 ? 1 : -1)); } }, { passive: true }); }
+      setupWheelNav() { let lastScroll = 0; document.addEventListener('wheel', (e) => { const now = Date.now(); if (now - lastScroll < 800) return; lastScroll = now; this.goToSlide(this.currentSlide + (e.deltaY > 0 ? 1 : -1)); }, { passive: true }); }
+      goToSlide(index) { const target = Math.max(0, Math.min(index, this.slides.length - 1)); this.slides[target].scrollIntoView({ behavior: 'instant' }); }
+      updateDots() { this.navDots.querySelectorAll('.nav-dot').forEach((dot, i) => { dot.classList.toggle('active', i === this.currentSlide); }); }
+      updateProgress() { const pct = ((this.currentSlide + 1) / this.slides.length) * 100; this.progressBar.style.width = pct + '%'; this.progressBar.setAttribute('aria-valuenow', Math.round(pct)); }
+    }
+    new SlidePresentation();
+  </script>
+</body>
+</html>

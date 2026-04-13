@@ -383,34 +383,65 @@ Try a multi-turn conversation:
 
 ## Step 3: Deploy
 
-Deployment requires adding the Lakebase instance as an app resource:
+Deployment requires adding the Lakebase instance, embedding endpoint, and other resources. Choose the deployment method that fits your workflow.
 
-```yaml
-# In databricks.yml or via the App UI
-resources:
-  apps:
-    memory_agent:
-      resources:
-        - name: lakebase
-          database:
-            database_name: databricks_postgres
-            instance_name: agent-memory
-            permission: CAN_CONNECT_AND_CREATE
+### Option A: Deploy from Workspace UI
+
+1. In the Databricks workspace, navigate to **Compute > Apps**
+2. Click **Create App**
+3. Enter a name (e.g., `memory-agent`) and set the source code path
+4. Under **Resources**, click **Add Resource** and add:
+   - **MLflow Experiment**: Select your experiment. Set permission to **CAN_MANAGE**
+   - **Serving Endpoint**: Select `databricks-claude-sonnet-4-5`. Set permission to **CAN_QUERY**
+   - **Serving Endpoint**: Select `databricks-gte-large-en` (for embeddings). Set permission to **CAN_QUERY**
+   - **Database**: Select your Lakebase instance, database `databricks_postgres`. Set permission to **CAN_CONNECT_AND_CREATE**
+5. Under **Environment Variables**, add:
+   - `LAKEBASE_INSTANCE_NAME` = your Lakebase instance name
+6. Upload your source code or sync it from workspace files
+7. Click **Deploy**
+
+### Option B: Deploy from CLI
+
+```bash
+# 1. Create the app
+databricks apps create memory-agent
+
+# 2. Add resources via the app's edit page in the UI:
+#    - MLflow Experiment (CAN_MANAGE)
+#    - Serving Endpoint: databricks-claude-sonnet-4-5 (CAN_QUERY)
+#    - Serving Endpoint: databricks-gte-large-en (CAN_QUERY)
+#    - Database: Lakebase instance, databricks_postgres (CAN_CONNECT_AND_CREATE)
+#    - Environment variable: LAKEBASE_INSTANCE_NAME
+
+# 3. Sync and deploy
+DATABRICKS_USERNAME=$(databricks current-user me | jq -r .userName)
+databricks sync . "/Users/$DATABRICKS_USERNAME/memory-agent"
+databricks apps deploy memory-agent \
+  --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/memory-agent
 ```
 
-Then grant the app's service principal access to Lakebase:
+### Option C: Deploy from Asset Bundles
+
+This chapter includes a `databricks.yml` that declares all resources -- the app, MLflow experiment, serving endpoints, and Lakebase database -- in a single file.
+
+```bash
+# Validate the bundle configuration
+databricks bundle validate
+
+# Deploy everything with one command
+databricks bundle deploy
+```
+
+The bundle automatically creates the app, grants the service principal access to all resources, and deploys. See [Chapter 4](../04-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
+
+### Lakebase Permissions
+
+If the app's service principal needs additional Lakebase permissions beyond what the resource declaration provides, connect to your Lakebase instance and run:
 
 ```sql
--- Connect to your Lakebase instance and run:
 GRANT ALL ON DATABASE databricks_postgres TO "<app-service-principal-id>";
 GRANT ALL ON SCHEMA public TO "<app-service-principal-id>";
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "<app-service-principal-id>";
-```
-
-Deploy as usual:
-
-```bash
-databricks bundle deploy
 ```
 
 ## Step 4: Evaluate Your Agent

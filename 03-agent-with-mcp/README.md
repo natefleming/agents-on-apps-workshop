@@ -221,15 +221,28 @@ Each MCP server you add gives your agent access to its entire tool catalog autom
 
 ## Step 5: Deploy to Databricks Apps
 
-Deployment is the same as Chapter 2:
+There are three ways to deploy. Choose the one that fits your workflow.
+
+### Option A: Deploy from Workspace UI
+
+1. In the Databricks workspace, navigate to **Compute > Apps**
+2. Click **Create App**
+3. Enter a name (e.g., `agent-with-mcp`) and set the source code path
+4. Under **Resources**, click **Add Resource** and add:
+   - **MLflow Experiment**: Select your experiment. Set permission to **CAN_MANAGE**
+   - **Serving Endpoint**: Select `databricks-claude-sonnet-4-5`. Set permission to **CAN_QUERY**
+5. Upload your source code or sync it from workspace files
+6. Click **Deploy**
+
+### Option B: Deploy from CLI
 
 ```bash
 # Create the app (if not already created)
 databricks apps create agent-with-mcp
 
 # Add resources via the app's edit page:
-# - MLflow Experiment
-# - Serving Endpoint (for the LLM model)
+# - MLflow Experiment (CAN_MANAGE)
+# - Serving Endpoint: databricks-claude-sonnet-4-5 (CAN_QUERY)
 
 # Sync and deploy
 DATABRICKS_USERNAME=$(databricks current-user me | jq -r .userName)
@@ -238,7 +251,15 @@ databricks apps deploy agent-with-mcp \
   --source-code-path /Workspace/Users/$DATABRICKS_USERNAME/agent-with-mcp
 ```
 
-### Important: MCP Server Authentication
+### Option C: Deploy from Asset Bundles
+
+Asset Bundles define everything in a single `databricks.yml` file. This is covered in detail in [Chapter 4](../04-deploy-with-bundles/).
+
+```bash
+databricks bundle deploy
+```
+
+### MCP Server Authentication
 
 When deployed to Databricks Apps, the MCP client automatically authenticates using the app's service principal. The `system.ai` MCP server is available to all workspace users by default, so no additional permissions are needed.
 
@@ -286,10 +307,6 @@ See [Chapter 2](../02-hello-agent/README.md#step-6-evaluate-your-agent) for a de
 
 ## What's Next
 
-You now have a solid foundation for building agents on Databricks Apps. From here, you can:
+In [Chapter 4](../04-deploy-with-bundles/), you'll learn how to use **Databricks Asset Bundles** for declarative, repeatable deployments with a single `databricks.yml` file and multi-target support (dev/staging/prod).
 
-- Add more MCP servers for SQL, Vector Search, or Genie
-- Build custom MCP servers with FastMCP for your own APIs
-- Add on-behalf-of (OBO) authentication for user-scoped access ([see auth docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication))
-- Create evaluation datasets to systematically test your agent
-- Deploy to production with proper resource permissions
+Then in [Chapter 5](../05-agent-memory/), you'll add **short-term and long-term memory** to your agent using Lakebase, so it can remember conversation history and user preferences across sessions.
