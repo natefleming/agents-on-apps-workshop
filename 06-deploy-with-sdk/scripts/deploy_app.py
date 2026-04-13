@@ -21,7 +21,9 @@ from databricks.sdk.service.apps import (
     AppDeployment,
     AppResource,
     AppResourceExperiment,
+    AppResourceExperimentExperimentPermission,
     AppResourceServingEndpoint,
+    AppResourceServingEndpointServingEndpointPermission,
     EnvVar,
 )
 
@@ -37,12 +39,19 @@ def create_or_get_app(
     description: str,
     resources: list[AppResource],
 ) -> App:
-    """Create a new app or return the existing one."""
+    """Create a new app or return and update the existing one."""
+    from databricks.sdk.errors import NotFound
+
     try:
         existing = w.apps.get(app_name)
         print(f"  App '{app_name}' already exists (status: {existing.app_status.state.value})")
-        return existing
-    except Exception:
+        updated = w.apps.update(
+            name=app_name,
+            app=App(name=app_name, description=description, resources=resources),
+        )
+        print(f"  Updated app resources")
+        return updated
+    except NotFound:
         pass
 
     print(f"  Creating app '{app_name}'...")
@@ -114,7 +123,7 @@ def main():
             description="MLflow experiment for tracing agent interactions",
             experiment=AppResourceExperiment(
                 experiment_id=experiment_id,
-                permission="CAN_MANAGE",
+                permission=AppResourceExperimentExperimentPermission.CAN_MANAGE,
             ),
         ),
         AppResource(
@@ -122,7 +131,7 @@ def main():
             description="Foundation model endpoint for the agent",
             serving_endpoint=AppResourceServingEndpoint(
                 name=args.llm_endpoint,
-                permission="CAN_QUERY",
+                permission=AppResourceServingEndpointServingEndpointPermission.CAN_QUERY,
             ),
         ),
     ]
