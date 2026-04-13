@@ -1,4 +1,4 @@
-# Chapter 5: Short-Term and Long-Term Memory
+# Chapter 4: Short-Term and Long-Term Memory
 
 In previous chapters, our agent was **stateless** -- every request was independent, with no memory of prior conversations. In this chapter, you'll add both **short-term memory** (conversation history within a session) and **long-term memory** (facts that persist across sessions and users).
 
@@ -7,7 +7,7 @@ Both types use [Lakebase](https://docs.databricks.com/aws/en/lakebase/), Databri
 ## What Are Short-Term and Long-Term Memory?
 
 <p align="center">
-  <img src="../docs/diagrams/05-memory-architecture.svg" alt="Memory Architecture">
+  <img src="../docs/diagrams/04-memory-architecture.svg" alt="Memory Architecture">
 </p>
 
 ### Short-Term Memory (Conversation History)
@@ -47,7 +47,7 @@ The agent code supports both. You configure which one to use via environment var
 
 ### What Changed from Chapter 3
 
-| Component | Chapter 3 (Stateless) | Chapter 5 (Short-Term Memory) |
+| Component | Chapter 3 (Stateless) | Chapter 4 (Short-Term Memory) |
 |-----------|----------------------|-------------------------------|
 | **Dependency** | `databricks-langchain` | `databricks-langchain[memory]` |
 | **Agent state** | Default | Custom `StatefulAgentState` with `add_messages` |
@@ -136,7 +136,7 @@ async def stream_handler(
 ```
 
 <p align="center">
-  <img src="../docs/diagrams/05-short-term-flow.svg" alt="Short-Term Memory Flow">
+  <img src="../docs/diagrams/04-short-term-flow.svg" alt="Short-Term Memory Flow">
 </p>
 
 ### Thread ID Resolution
@@ -262,7 +262,7 @@ async def stream_handler(
 ```
 
 <p align="center">
-  <img src="../docs/diagrams/05-long-term-flow.svg" alt="Long-Term Memory Flow">
+  <img src="../docs/diagrams/04-long-term-flow.svg" alt="Long-Term Memory Flow">
 </p>
 
 ### System Prompt for Memory
@@ -334,7 +334,7 @@ w.postgres.create_role(
 ### Configure Environment
 
 ```bash
-cd 05-agent-memory
+cd 04-agent-memory
 cp .env.example .env.local
 ```
 
@@ -434,7 +434,7 @@ After the app is running, **grant the app's service principal access to Lakebase
 databricks apps get <your-app-name> | jq -r .service_principal_client_id
 ```
 
-> **Note:** Autoscaling Lakebase projects cannot be declared as a `database` resource in the bundle. The SP must be granted access separately. See [Chapter 4](../04-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
+> **Note:** Autoscaling Lakebase projects cannot be declared as a `database` resource in the bundle. The SP must be granted access separately. See [Chapter 5](../05-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
 
 ### Lakebase Permissions
 

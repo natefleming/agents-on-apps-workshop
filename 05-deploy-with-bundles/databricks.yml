@@ -20,7 +20,7 @@ resources:
   # The Databricks App
   apps:
     agent_app:
-      name: agents-workshop-${var.resource_name_suffix}
+      name: aw-mcp-${var.resource_name_suffix}
       description: "Workshop agent with custom tools and MCP server integration"
       source_code_path: .
 
@@ -47,7 +47,7 @@ resources:
         - name: experiment
           description: "MLflow experiment for tracing agent interactions"
           experiment:
-            experiment_name: ${resources.experiments.agent_experiment.name}
+            experiment_id: ${resources.experiments.agent_experiment.id}
             permission: CAN_MANAGE
         - name: llm
           description: "Foundation model endpoint for the agent"
@@ -68,15 +68,7 @@ sync:
     - "pyproject.toml"
   exclude:
     - ".venv/**"
-    - "__pycache__/**"
-    - "*.pyc"
-    - ".git/**"
     - ".databricks/**"
-    - "e2e-chatbot-app-next/**"
-    - "temp-app-templates/**"
-    - "backend.log"
-    - "frontend.log"
-    - ".env.local"
     - ".env.example"
 
 # Deployment targets

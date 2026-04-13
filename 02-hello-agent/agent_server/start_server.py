@@ -32,8 +32,11 @@ agent_server: AgentServer = AgentServer("ResponsesAgent", enable_chat_proxy=True
 # running with multiple workers (e.g., --workers 4).
 app = agent_server.app  # noqa: F841
 
-# Link MLflow model versions to git commits for traceability.
-setup_mlflow_git_based_version_tracking()
+# Link MLflow model versions to git commits (may fail in deployed environments without .git)
+try:
+    setup_mlflow_git_based_version_tracking()
+except Exception:
+    pass
 
 
 def main() -> None:

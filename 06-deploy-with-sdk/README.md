@@ -9,11 +9,11 @@ In previous chapters, we deployed using the Workspace UI, CLI commands, or Asset
 - How to manage the full app lifecycle: create, deploy, update, stop, delete
 - When to choose SDK deployment over the other three methods
 
-## What Changed from Chapter 4
+## What Changed from Chapter 5
 
-The agent code (`agent_server/`) is **identical** to Chapters 3-4. The only difference is **how we deploy it**:
+The agent code (`agent_server/`) is **identical** to Chapters 3-5. The only difference is **how we deploy it**:
 
-| | CLI (Ch 2-3) | Asset Bundles (Ch 4) | Python SDK (Ch 6) |
+| | CLI (Ch 2-3) | Asset Bundles (Ch 5) | Python SDK (Ch 6) |
 |---|---|---|---|
 | Config | `app.yaml` | `databricks.yml` | Python code |
 | Create app | `databricks apps create` | `databricks bundle deploy` | `w.apps.create()` |
@@ -114,7 +114,7 @@ from databricks.sdk.service.apps import (
     AppResourceSqlWarehouse,
 )
 
-# Lakebase database (for memory - Chapter 5)
+# Lakebase database (for memory - Chapter 4)
 AppResource(
     name="database",
     database=AppResourceDatabase(

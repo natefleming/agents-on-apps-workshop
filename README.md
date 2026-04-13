@@ -28,8 +28,8 @@ Build, test, and deploy AI agents on Databricks Apps. This workshop takes you fr
 | [01](./01-introduction/) | Introduction to Agents on Apps | Understand the architecture and key concepts |
 | [02](./02-hello-agent/) | Hello Agent: Your First LangGraph Agent | A working agent with custom Python tools (weather, calculator) |
 | [03](./03-agent-with-mcp/) | Adding MCP Server Tools | Extend your agent with Databricks' built-in code interpreter via MCP |
-| [04](./04-deploy-with-bundles/) | Deploying with Asset Bundles | Declarative deployment with `databricks.yml` and multi-target support |
-| [05](./05-agent-memory/) | Short-Term and Long-Term Memory | Conversation history and persistent user knowledge with Lakebase |
+| [04](./04-agent-memory/) | Short-Term and Long-Term Memory | Conversation history and persistent user knowledge with Lakebase |
+| [05](./05-deploy-with-bundles/) | Deploying with Asset Bundles | Declarative deployment with `databricks.yml` and multi-target support |
 | [06](./06-deploy-with-sdk/) | Deploying with the Python SDK | Programmatic deployment via `WorkspaceClient().apps` |
 
 ## Quick Start

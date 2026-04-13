@@ -272,7 +272,7 @@ databricks apps deploy hello-agent \
 
 ### Option C: Deploy from Asset Bundles
 
-Asset Bundles define everything in a single `databricks.yml` file -- no manual resource configuration needed. This is covered in detail in [Chapter 4](../04-deploy-with-bundles/).
+Asset Bundles define everything in a single `databricks.yml` file -- no manual resource configuration needed. This is covered in detail in [Chapter 5](../05-deploy-with-bundles/).
 
 ```bash
 databricks bundle deploy

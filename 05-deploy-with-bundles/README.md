@@ -1,4 +1,4 @@
-# Chapter 4: Deploying with Databricks Asset Bundles
+# Chapter 5: Deploying with Databricks Asset Bundles
 
 In the previous chapters, we deployed our agent using manual CLI commands (`databricks apps create`, `databricks sync`, `databricks apps deploy`). This works fine for development, but for production you want **declarative, repeatable deployments**. That's what Databricks Asset Bundles (DABs) provide.
 
@@ -27,7 +27,7 @@ A bundle can declare:
 
 The agent code (`agent_server/`) is **identical** to Chapter 3. The only difference is **how we deploy it**:
 
-| | Chapters 2-3 | Chapter 4 |
+| | Chapters 2-3 | Chapter 5 |
 |---|---|---|
 | Config file | `app.yaml` | `databricks.yml` |
 | Create app | `databricks apps create` | `databricks bundle deploy` |
@@ -199,13 +199,13 @@ targets:
 ```
 
 <p align="center">
-  <img src="../docs/diagrams/04-targets.svg" alt="Multi-Target Deployment">
+  <img src="../docs/diagrams/05-targets.svg" alt="Multi-Target Deployment">
 </p>
 
 ## Step 2: Deploy
 
 <p align="center">
-  <img src="../docs/diagrams/04-deploy-pipeline.svg" alt="Bundle Deploy Pipeline">
+  <img src="../docs/diagrams/05-deploy-pipeline.svg" alt="Bundle Deploy Pipeline">
 </p>
 
 ### Deploy to Dev (Default)

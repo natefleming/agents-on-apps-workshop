@@ -1,5 +1,5 @@
 """
-Chapter 5: Agent with Short-Term and Long-Term Memory.
+Chapter 4: Agent with Short-Term and Long-Term Memory.
 
 This module builds on Chapter 3 by adding two types of memory:
 
