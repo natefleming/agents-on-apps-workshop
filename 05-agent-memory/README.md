@@ -36,18 +36,12 @@ Long-term memory lets your agent remember **facts about users across conversatio
 
 ## Prerequisites
 
-Both memory types require a **Lakebase instance**. You can use either:
+Both memory types require a **Lakebase** database. Lakebase comes in two flavors:
 
-- **Provisioned Lakebase** -- a dedicated instance you create
-- **Autoscaling Lakebase** -- a shared, serverless instance (project + branch)
+- **Autoscaling Lakebase** (recommended) -- serverless, scales to zero, organized as projects + branches. This is the default for new instances.
+- **Provisioned Lakebase** -- dedicated compute with fixed capacity.
 
-To create a provisioned Lakebase instance:
-
-```bash
-databricks lakebase create-database-instance <instance-name> --capacity CU_1
-```
-
-Or use the Databricks UI: **SQL** > **Lakebase** > **Create instance**.
+The agent code supports both. You configure which one to use via environment variables (`LAKEBASE_PROJECT`/`LAKEBASE_BRANCH` for autoscaling, or `LAKEBASE_INSTANCE_NAME` for provisioned). See [Step 1](#step-1-set-up-lakebase) for setup instructions.
 
 ## Part A: Short-Term Memory
 
@@ -116,10 +110,18 @@ async def stream_handler(
     }
 
     # Open both short-term (checkpointer) and long-term (store) connections
-    async with AsyncCheckpointSaver(instance_name=LAKEBASE_INSTANCE_NAME) as checkpointer:
+    # Build connection kwargs — autoscaling uses project+branch, provisioned uses instance_name
+    lakebase_kwargs = {}
+    if LAKEBASE_PROJECT:
+        lakebase_kwargs["project"] = LAKEBASE_PROJECT
+        lakebase_kwargs["branch"] = LAKEBASE_BRANCH or "production"
+    else:
+        lakebase_kwargs["instance_name"] = LAKEBASE_INSTANCE_NAME
+
+    async with AsyncCheckpointSaver(**lakebase_kwargs) as checkpointer:
         await checkpointer.setup()
         async with AsyncDatabricksStore(
-            instance_name=LAKEBASE_INSTANCE_NAME,
+            **lakebase_kwargs,
             embedding_endpoint=EMBEDDING_ENDPOINT,
             embedding_dims=EMBEDDING_DIMS,
         ) as store:
@@ -243,7 +245,7 @@ async def stream_handler(
     user_id: Optional[str] = get_user_id(request)
 
     async with AsyncDatabricksStore(
-        instance_name=LAKEBASE_INSTANCE_NAME,
+        **lakebase_kwargs,  # Same project+branch or instance_name as checkpointer
         embedding_endpoint=EMBEDDING_ENDPOINT,
         embedding_dims=EMBEDDING_DIMS,
     ) as store:
@@ -284,11 +286,50 @@ Always check for relevant memories at the start of a conversation.
 
 ## Step 1: Set Up Lakebase
 
-### Create a Lakebase Instance
+### Create a Lakebase Project
 
-```bash
-databricks lakebase create-database-instance agent-memory --capacity CU_1
+You can create a Lakebase project from the Databricks UI or via the Python SDK:
+
+**From the UI:** Navigate to **SQL** > **Lakebase** > **Create project**.
+
+**From the SDK:**
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.postgres import Project, ProjectSpec
+
+w = WorkspaceClient()
+w.postgres.create_project(project=Project(spec=ProjectSpec()), project_id="my-agent-memory")
 ```
+
+Every new project automatically gets a `production` branch with a read-write endpoint.
+
+### Grant Yourself Access
+
+Your user needs a Postgres role on the Lakebase project to connect. Without this, you'll get `password authentication failed` errors when running locally.
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.postgres import (
+    Role, RoleRoleSpec, RoleAuthMethod, RoleIdentityType, RoleMembershipRole,
+)
+
+w = WorkspaceClient()
+role = Role(
+    spec=RoleRoleSpec(
+        auth_method=RoleAuthMethod.LAKEBASE_OAUTH_V1,
+        identity_type=RoleIdentityType.USER,
+        postgres_role="your.email@company.com",  # your Databricks username
+        membership_roles=[RoleMembershipRole.DATABRICKS_SUPERUSER],
+    )
+)
+w.postgres.create_role(
+    parent="projects/<your-project>/branches/production",
+    role=role,
+)
+```
+
+> **Note:** If you're using an **existing** Lakebase project that already has checkpoint tables from a different version of `langgraph`, you may see `column "checkpoint_id" does not exist` errors. Either create a fresh project or drop the old checkpoint tables.
 
 ### Configure Environment
 
@@ -302,8 +343,11 @@ Edit `.env.local`:
 ```bash
 DATABRICKS_CONFIG_PROFILE=DEFAULT
 MLFLOW_EXPERIMENT_ID=<your-experiment-id>
-LAKEBASE_INSTANCE_NAME=agent-memory    # your instance name
+LAKEBASE_PROJECT=my-agent-memory   # your Lakebase project name
+LAKEBASE_BRANCH=production         # branch (default: production)
 ```
+
+> **Provisioned Lakebase:** If you have a provisioned Lakebase instance instead of an autoscaling project, set `LAKEBASE_INSTANCE_NAME` instead of `LAKEBASE_PROJECT`/`LAKEBASE_BRANCH`. The agent code supports both modes.
 
 ## Step 2: Run Locally
 
@@ -328,7 +372,7 @@ Try a multi-turn conversation:
 
 ## Step 3: Deploy
 
-Deployment requires adding the Lakebase instance, embedding endpoint, and other resources. Choose the deployment method that fits your workflow.
+Deployment requires adding the Lakebase project, embedding endpoint, and other resources. Choose the deployment method that fits your workflow.
 
 ### Option A: Deploy from Workspace UI
 
@@ -339,11 +383,12 @@ Deployment requires adding the Lakebase instance, embedding endpoint, and other 
    - **MLflow Experiment**: Select your experiment. Set permission to **CAN_MANAGE**
    - **Serving Endpoint**: Select `databricks-claude-sonnet-4-5`. Set permission to **CAN_QUERY**
    - **Serving Endpoint**: Select `databricks-gte-large-en` (for embeddings). Set permission to **CAN_QUERY**
-   - **Database**: Select your Lakebase instance, database `databricks_postgres`. Set permission to **CAN_CONNECT_AND_CREATE**
 5. Under **Environment Variables**, add:
-   - `LAKEBASE_INSTANCE_NAME` = your Lakebase instance name
-6. Upload your source code or sync it from workspace files
-7. Click **Deploy**
+   - `LAKEBASE_PROJECT` = your Lakebase project name
+   - `LAKEBASE_BRANCH` = `production` (or your branch name)
+6. **Grant the app's service principal access to Lakebase** (see [Lakebase Permissions](#lakebase-permissions) below)
+7. Upload your source code or sync it from workspace files
+8. Click **Deploy**
 
 ### Option B: Deploy from CLI
 
@@ -355,10 +400,11 @@ databricks apps create memory-agent
 #    - MLflow Experiment (CAN_MANAGE)
 #    - Serving Endpoint: databricks-claude-sonnet-4-5 (CAN_QUERY)
 #    - Serving Endpoint: databricks-gte-large-en (CAN_QUERY)
-#    - Database: Lakebase instance, databricks_postgres (CAN_CONNECT_AND_CREATE)
-#    - Environment variable: LAKEBASE_INSTANCE_NAME
+#    - Environment variables: LAKEBASE_PROJECT, LAKEBASE_BRANCH
 
-# 3. Sync and deploy
+# 3. Grant the app's SP access to Lakebase (see Lakebase Permissions below)
+
+# 4. Sync and deploy
 DATABRICKS_USERNAME=$(databricks current-user me | jq -r .userName)
 databricks sync . "/Users/$DATABRICKS_USERNAME/memory-agent"
 databricks apps deploy memory-agent \
@@ -367,26 +413,56 @@ databricks apps deploy memory-agent \
 
 ### Option C: Deploy from Asset Bundles
 
-This chapter includes a `databricks.yml` that declares all resources -- the app, MLflow experiment, serving endpoints, and Lakebase database -- in a single file.
+This chapter includes a `databricks.yml` that declares all resources -- the app, MLflow experiment, and serving endpoints -- in a single file.
+
+Before deploying, edit `databricks.yml` to set your Lakebase project name in the `dev` target, and edit `app.yaml` to set `LAKEBASE_PROJECT` to your project name.
 
 ```bash
 # Validate the bundle configuration
 databricks bundle validate
 
-# Deploy everything with one command
+# Deploy resources and upload source code
 databricks bundle deploy
+
+# Start the app and trigger code deployment
+databricks bundle run agent_app
 ```
 
-The bundle automatically creates the app, grants the service principal access to all resources, and deploys. See [Chapter 4](../04-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
+After the app is running, **grant the app's service principal access to Lakebase** (see [Lakebase Permissions](#lakebase-permissions) below). The app's SP client ID can be found with:
+
+```bash
+databricks apps get <your-app-name> | jq -r .service_principal_client_id
+```
+
+> **Note:** Autoscaling Lakebase projects cannot be declared as a `database` resource in the bundle. The SP must be granted access separately. See [Chapter 4](../04-deploy-with-bundles/) for a detailed walkthrough of how Asset Bundles work.
 
 ### Lakebase Permissions
 
-If the app's service principal needs additional Lakebase permissions beyond what the resource declaration provides, connect to your Lakebase instance and run:
+The app's service principal needs a Postgres role on your Lakebase project. Without this, the deployed app will fail with connection errors.
 
-```sql
-GRANT ALL ON DATABASE databricks_postgres TO "<app-service-principal-id>";
-GRANT ALL ON SCHEMA public TO "<app-service-principal-id>";
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "<app-service-principal-id>";
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.postgres import (
+    Role, RoleRoleSpec, RoleAuthMethod, RoleIdentityType, RoleMembershipRole,
+)
+
+w = WorkspaceClient()
+
+# Get the SP client ID from: databricks apps get <app-name> | jq -r .service_principal_client_id
+sp_client_id = "<app-service-principal-client-id>"
+
+role = Role(
+    spec=RoleRoleSpec(
+        auth_method=RoleAuthMethod.LAKEBASE_OAUTH_V1,
+        identity_type=RoleIdentityType.SERVICE_PRINCIPAL,
+        postgres_role=sp_client_id,
+        membership_roles=[RoleMembershipRole.DATABRICKS_SUPERUSER],
+    )
+)
+w.postgres.create_role(
+    parent="projects/<your-project>/branches/production",
+    role=role,
+)
 ```
 
 ## Step 4: Evaluate Your Agent

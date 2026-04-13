@@ -66,19 +66,22 @@ sp_workspace_client: WorkspaceClient = WorkspaceClient()
 # LLM model endpoint hosted on Databricks Foundation Model APIs
 LLM_ENDPOINT_NAME: str = "databricks-claude-sonnet-4-5"
 
-# Lakebase instance name — required for both short-term and long-term memory.
-# Set via LAKEBASE_INSTANCE_NAME in .env.local or app.yaml.
+# Lakebase connection — supports both autoscaling (project+branch) and provisioned (instance_name).
+# Set via environment variables in .env.local or app.yaml.
 LAKEBASE_INSTANCE_NAME: Optional[str] = os.getenv("LAKEBASE_INSTANCE_NAME") or None
+LAKEBASE_PROJECT: Optional[str] = os.getenv("LAKEBASE_PROJECT") or None
+LAKEBASE_BRANCH: Optional[str] = os.getenv("LAKEBASE_BRANCH") or None
 
 # Embedding model for long-term memory semantic search.
 # databricks-gte-large-en produces 1024-dimensional vectors.
 EMBEDDING_ENDPOINT: str = "databricks-gte-large-en"
 EMBEDDING_DIMS: int = 1024
 
-if not LAKEBASE_INSTANCE_NAME:
+if not LAKEBASE_INSTANCE_NAME and not LAKEBASE_PROJECT:
     raise ValueError(
-        "LAKEBASE_INSTANCE_NAME is required. Set it in your .env.local file.\n"
-        "Create a Lakebase instance: databricks lakebase create-database-instance <name> --capacity CU_1"
+        "Lakebase configuration is required. Set either:\n"
+        "  - LAKEBASE_PROJECT and LAKEBASE_BRANCH in .env.local (autoscaling Lakebase)\n"
+        "  - LAKEBASE_INSTANCE_NAME in .env.local (provisioned Lakebase)"
     )
 
 # System prompt with memory usage instructions.
@@ -239,8 +242,17 @@ async def stream_handler(
         # Open the short-term memory connection (checkpointer).
         # AsyncCheckpointSaver is an async context manager that manages the
         # Lakebase connection pool and creates tables on first use.
+        # Build Lakebase connection kwargs — autoscaling uses project+branch,
+        # provisioned uses instance_name.
+        lakebase_kwargs: dict[str, str] = {}
+        if LAKEBASE_PROJECT:
+            lakebase_kwargs["project"] = LAKEBASE_PROJECT
+            lakebase_kwargs["branch"] = LAKEBASE_BRANCH or "production"
+        else:
+            lakebase_kwargs["instance_name"] = LAKEBASE_INSTANCE_NAME
+
         async with AsyncCheckpointSaver(
-            instance_name=LAKEBASE_INSTANCE_NAME,
+            **lakebase_kwargs,
         ) as checkpointer:
             await checkpointer.setup()  # Create checkpoint tables if they don't exist
 
@@ -248,7 +260,7 @@ async def stream_handler(
             # AsyncDatabricksStore uses an embedding model for semantic search
             # over stored memories.
             async with AsyncDatabricksStore(
-                instance_name=LAKEBASE_INSTANCE_NAME,
+                **lakebase_kwargs,
                 embedding_endpoint=EMBEDDING_ENDPOINT,
                 embedding_dims=EMBEDDING_DIMS,
             ) as store:
@@ -275,6 +287,6 @@ async def stream_handler(
             logger.error(f"Lakebase access error: {e}")
             raise HTTPException(
                 status_code=503,
-                detail=get_lakebase_access_error_message(LAKEBASE_INSTANCE_NAME),
+                detail=get_lakebase_access_error_message(LAKEBASE_PROJECT or LAKEBASE_INSTANCE_NAME),
             ) from e
         raise

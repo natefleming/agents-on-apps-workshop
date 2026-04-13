@@ -7,8 +7,11 @@ bundle:
 variables:
   resource_name_suffix:
     description: "Suffix for resource names to avoid collisions between users"
-  lakebase_instance_name:
-    description: "Name of the Lakebase instance for agent memory storage"
+  lakebase_project:
+    description: "Name of the Lakebase autoscaling project for agent memory storage"
+  lakebase_branch:
+    description: "Lakebase branch name (default: production)"
+    default: "production"
 
 resources:
   # MLflow Experiment for agent tracing and evaluation
@@ -22,7 +25,7 @@ resources:
   # The Databricks App
   apps:
     agent_app:
-      name: agents-workshop-memory-${var.resource_name_suffix}
+      name: memory-agent-${var.resource_name_suffix}
       description: "Workshop agent with short-term and long-term memory via Lakebase"
       source_code_path: .
 
@@ -43,15 +46,17 @@ resources:
             value: "3000"
           - name: CHAT_PROXY_TIMEOUT_SECONDS
             value: "300"
-          - name: LAKEBASE_INSTANCE_NAME
-            value: ${var.lakebase_instance_name}
+          - name: LAKEBASE_PROJECT
+            value: ${var.lakebase_project}
+          - name: LAKEBASE_BRANCH
+            value: ${var.lakebase_branch}
 
       # Resources the app's service principal needs access to
       resources:
         - name: experiment
           description: "MLflow experiment for tracing agent interactions"
           experiment:
-            experiment_name: ${resources.experiments.agent_experiment.name}
+            experiment_id: ${resources.experiments.agent_experiment.id}
             permission: CAN_MANAGE
         - name: llm
           description: "Foundation model endpoint for the agent"
@@ -63,12 +68,10 @@ resources:
           serving_endpoint:
             name: databricks-gte-large-en
             permission: CAN_QUERY
-        - name: database
-          description: "Lakebase database for short-term and long-term memory"
-          database:
-            database_name: databricks_postgres
-            instance_name: ${var.lakebase_instance_name}
-            permission: CAN_CONNECT_AND_CREATE
+        # Note: Autoscaling Lakebase projects are not supported as app resources.
+        # Grant the app's service principal access to the Lakebase project after deployment:
+        #   databricks api post /api/2.0/postgres/projects/<project>/branches/<branch>/roles \
+        #     --json '{"role":{"spec":{"auth_method":"LAKEBASE_OAUTH_V1","identity_type":"SERVICE_PRINCIPAL","postgres_role":"<sp-id>"}}}'
 
       # Who can access the deployed app
       permissions:
@@ -100,17 +103,17 @@ targets:
     mode: development
     default: true
     variables:
-      resource_name_suffix: dev-${workspace.current_user.domain_friendly_name}
-      lakebase_instance_name: agent-memory-dev
+      resource_name_suffix: dev-${workspace.current_user.short_name}
+      lakebase_project: <your-lakebase-project>
 
   staging:
     mode: production
     variables:
       resource_name_suffix: "staging"
-      lakebase_instance_name: agent-memory-staging
+      lakebase_project: agent-memory-staging
 
   prod:
     mode: production
     variables:
       resource_name_suffix: "prod"
-      lakebase_instance_name: agent-memory-prod
+      lakebase_project: agent-memory-prod
