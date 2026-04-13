@@ -273,33 +273,39 @@
   </section>
 
   <!-- Slide 4: Deployment Overview -->
-  <section class="slide slide-ink" aria-label="Slide 4: Three Deployment Methods">
+  <section class="slide slide-ink" aria-label="Slide 4: Four Deployment Methods">
     <div class="slide-content" style="text-align: center;">
       <div class="section-label">Deployment</div>
-      <h2>Three Ways to Deploy</h2>
+      <h2>Four Ways to Deploy</h2>
       <div class="accent-line" style="margin: 1rem auto;"></div>
-      <p style="color: rgba(255,255,255,0.6); max-width: 700px; margin: 0 auto 1.5rem;">Every chapter supports all three methods. Choose the one that fits your workflow.</p>
-      <div class="card-grid card-grid-3" style="text-align: left; max-width: 950px; margin: 0 auto;">
+      <p style="color: rgba(255,255,255,0.6); max-width: 700px; margin: 0 auto 1.5rem;">Choose the method that fits your workflow. Every chapter supports all four.</p>
+      <div class="card-grid card-grid-4" style="text-align: left; max-width: 1050px; margin: 0 auto;">
         <div class="card">
-          <div style="margin-bottom: 0.75rem;"><span class="tag tag-amber">Workspace UI</span></div>
+          <div style="margin-bottom: 0.5rem;"><span class="tag tag-amber">Workspace UI</span></div>
           <h3 style="color: white;">Point &amp; Click</h3>
-          <p style="color: rgba(255,255,255,0.7);">Create app, add resources, and deploy through the Databricks console. No CLI required.</p>
-          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Exploration, first-time setup</p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Create app and add resources through the Databricks console.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 0.5rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Exploration</p>
         </div>
         <div class="card">
-          <div style="margin-bottom: 0.75rem;"><span class="tag tag-lava">CLI Commands</span></div>
+          <div style="margin-bottom: 0.5rem;"><span class="tag tag-lava">CLI Commands</span></div>
           <h3 style="color: white;">Three Commands</h3>
-          <p style="color: rgba(255,255,255,0.7);"><span class="inline-code">create</span> &rarr; <span class="inline-code">sync</span> &rarr; <span class="inline-code">deploy</span>. Scriptable and fast. Resources configured in UI.</p>
-          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Development, scripting, CI/CD</p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;"><span class="inline-code">create</span> &rarr; <span class="inline-code">sync</span> &rarr; <span class="inline-code">deploy</span>. Resources configured in UI.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 0.5rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Development</p>
         </div>
         <div class="card">
-          <div style="margin-bottom: 0.75rem;"><span class="tag tag-green">Asset Bundles</span></div>
+          <div style="margin-bottom: 0.5rem;"><span class="tag tag-green">Asset Bundles</span></div>
           <h3 style="color: white;">One Command</h3>
-          <p style="color: rgba(255,255,255,0.7);"><span class="inline-code">databricks bundle deploy</span>. App, resources, permissions &mdash; all declared in YAML.</p>
-          <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 0.75rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Production, multi-environment</p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;"><span class="inline-code">databricks bundle deploy</span>. Everything declared in YAML.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 0.5rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> Production</p>
+        </div>
+        <div class="card">
+          <div style="margin-bottom: 0.5rem;"><span class="tag tag-teal">Python SDK</span></div>
+          <h3 style="color: white;">Pure Python</h3>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;"><span class="inline-code">w.apps.create()</span> + <span class="inline-code">deploy()</span>. Full lifecycle in code.</p>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 0.5rem;"><strong style="color: rgba(255,255,255,0.7);">Best for:</strong> CI/CD, automation</p>
         </div>
       </div>
-      <p style="margin-top: 2rem; color: rgba(255,255,255,0.45); font-size: 0.9rem;">All methods require <strong style="color: rgba(255,255,255,0.7);">OAuth tokens</strong> (not PATs) &mdash; use <span class="inline-code" style="color: rgba(255,255,255,0.6);">databricks auth token</span></p>
+      <p style="margin-top: 1.5rem; color: rgba(255,255,255,0.45); font-size: 0.9rem;">All methods require <strong style="color: rgba(255,255,255,0.7);">OAuth tokens</strong> (not PATs) &mdash; use <span class="inline-code" style="color: rgba(255,255,255,0.6);">databricks auth token</span></p>
     </div>
   </section>
 
@@ -484,8 +490,77 @@ databricks bundle destroy</div>
     </div>
   </section>
 
-  <!-- Slide 8: Dev Workflow -->
-  <section class="slide slide-white" aria-label="Slide 8: Development Workflow">
+  <!-- Slide 8: Deploy from Python SDK -->
+  <section class="slide slide-dark" aria-label="Slide 8: Deploy from Python SDK">
+    <div class="slide-content">
+      <div class="section-label">Deployment &mdash; Option D</div>
+      <h2>Deploy from Python SDK</h2>
+      <div class="accent-line"></div>
+      <p style="color: rgba(255,255,255,0.7); max-width: 700px;">Full app lifecycle in Python via <span class="inline-code">WorkspaceClient().apps</span>. Create, deploy, update, stop, and delete &mdash; all programmatically.</p>
+      <div class="two-col" style="margin-top: 1rem; gap: 2.5rem;">
+        <div>
+          <div class="code-block" style="font-size: 0.7rem; padding: 1.25rem;"><span class="keyword">from</span> databricks.sdk <span class="keyword">import</span> <span class="type">WorkspaceClient</span>
+<span class="keyword">from</span> databricks.sdk.service.apps <span class="keyword">import</span> (
+    <span class="type">App</span>, <span class="type">AppDeployment</span>, <span class="type">AppResource</span>,
+    <span class="type">AppResourceServingEndpoint</span>, <span class="type">EnvVariable</span>,
+)
+
+w = <span class="type">WorkspaceClient</span>()
+
+<span class="comment"># 1. Create app with resources</span>
+app = w.apps.<span class="func">create_and_wait</span>(<span class="type">App</span>(
+    name=<span class="string">"my-agent"</span>,
+    resources=[<span class="type">AppResource</span>(
+        name=<span class="string">"llm"</span>,
+        serving_endpoint=<span class="type">AppResourceServingEndpoint</span>(
+            name=<span class="string">"databricks-claude-sonnet-4-5"</span>,
+            permission=<span class="string">"CAN_QUERY"</span>,
+        ),
+    )],
+))
+
+<span class="comment"># 2. Deploy from workspace path</span>
+w.apps.<span class="func">deploy_and_wait</span>(
+    <span class="string">"my-agent"</span>,
+    <span class="type">AppDeployment</span>(
+        source_code_path=<span class="string">"/Workspace/Users/me/agent"</span>,
+        env_vars=[<span class="type">EnvVariable</span>(
+            name=<span class="string">"MLFLOW_TRACKING_URI"</span>,
+            value=<span class="string">"databricks"</span>,
+        )],
+    ),
+)</div>
+        </div>
+        <div>
+          <h3 style="color: white; margin-bottom: 0.5rem;">Manage the lifecycle</h3>
+          <div class="code-block" style="font-size: 0.7rem; padding: 1.25rem;"><span class="comment"># Check status</span>
+app = w.apps.<span class="func">get</span>(<span class="string">"my-agent"</span>)
+<span class="keyword">print</span>(app.url, app.app_status.state)
+
+<span class="comment"># List deployments</span>
+<span class="keyword">for</span> d <span class="keyword">in</span> w.apps.<span class="func">list_deployments</span>(<span class="string">"my-agent"</span>):
+    <span class="keyword">print</span>(d.deployment_id, d.status.state)
+
+<span class="comment"># Stop / start / delete</span>
+w.apps.<span class="func">stop_and_wait</span>(<span class="string">"my-agent"</span>)
+w.apps.<span class="func">start_and_wait</span>(<span class="string">"my-agent"</span>)
+w.apps.<span class="func">delete</span>(<span class="string">"my-agent"</span>)</div>
+          <div style="margin-top: 1rem;">
+            <h3 style="color: white; margin-bottom: 0.5rem;">When to use SDK</h3>
+            <ul class="bullet-list" style="font-size: 0.88rem;">
+              <li>CI/CD pipelines with custom logic</li>
+              <li>Deploy from Databricks notebooks</li>
+              <li>Dynamic multi-tenant provisioning</li>
+              <li>Integration testing frameworks</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Dev Workflow -->
+  <section class="slide slide-white" aria-label="Slide 9: Development Workflow">
     <div class="slide-content">
       <div class="section-label">Developer Experience</div>
       <h2>Local Development Workflow</h2>
@@ -519,8 +594,8 @@ databricks bundle destroy</div>
     </div>
   </section>
 
-  <!-- Slide 9: Key Components -->
-  <section class="slide slide-white" aria-label="Slide 9: Key Components">
+  <!-- Slide 10: Key Components -->
+  <section class="slide slide-white" aria-label="Slide 10: Key Components">
     <div class="slide-content">
       <div class="section-label">Core Stack</div>
       <h2>Key Components</h2>
@@ -549,8 +624,8 @@ databricks bundle destroy</div>
     </div>
   </section>
 
-  <!-- Slide 10: Chapter 2 - Hello Agent -->
-  <section class="slide slide-dark" aria-label="Slide 10: Chapter 2 Hello Agent">
+  <!-- Slide 11: Chapter 2 - Hello Agent -->
+  <section class="slide slide-dark" aria-label="Slide 11: Chapter 2 Hello Agent">
     <div class="slide-content">
       <div class="section-label">Chapter 2</div>
       <h2>Hello Agent: Custom Tools</h2>
@@ -596,8 +671,8 @@ MODEL = <span class="type">ChatDatabricks</span>(
     </div>
   </section>
 
-  <!-- Slide 11: @invoke and @stream -->
-  <section class="slide slide-ink" aria-label="Slide 11: invoke and stream decorators">
+  <!-- Slide 12: @invoke and @stream -->
+  <section class="slide slide-ink" aria-label="Slide 12: invoke and stream decorators">
     <div class="slide-content">
       <div class="section-label">The Server Contract</div>
       <h2>@invoke() and @stream()</h2>
@@ -624,8 +699,8 @@ MODEL = <span class="type">ChatDatabricks</span>(
     </div>
   </section>
 
-  <!-- Slide 12: Chapter 3 - MCP -->
-  <section class="slide slide-light" aria-label="Slide 12: Chapter 3 MCP Integration">
+  <!-- Slide 13: Chapter 3 - MCP -->
+  <section class="slide slide-light" aria-label="Slide 13: Chapter 3 MCP Integration">
     <div class="slide-content">
       <div class="section-label">Chapter 3</div>
       <h2>MCP Server Integration</h2>
@@ -669,8 +744,8 @@ MODEL = <span class="type">ChatDatabricks</span>(
     </div>
   </section>
 
-  <!-- Slide 13: Chapter 5 - Memory -->
-  <section class="slide slide-light" aria-label="Slide 13: Chapter 5 Agent Memory">
+  <!-- Slide 14: Chapter 5 - Memory -->
+  <section class="slide slide-light" aria-label="Slide 14: Chapter 5 Agent Memory">
     <div class="slide-content">
       <div class="section-label">Chapter 5</div>
       <h2>Short-Term &amp; Long-Term Memory</h2>
@@ -719,8 +794,8 @@ MODEL = <span class="type">ChatDatabricks</span>(
     </div>
   </section>
 
-  <!-- Slide 14: Summary / Next Steps -->
-  <section class="slide slide-dark" aria-label="Slide 14: Summary">
+  <!-- Slide 15: Summary / Next Steps -->
+  <section class="slide slide-dark" aria-label="Slide 15: Summary">
     <div class="slide-content" style="text-align: center;">
       <svg class="db-logo" viewBox="0 0 713 113" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Databricks" style="height: 32px; margin-bottom: 2rem;">
         <g clip-path="url(#clip0_dark_close)">
@@ -755,14 +830,18 @@ MODEL = <span class="type">ChatDatabricks</span>(
           <p style="color: rgba(255,255,255,0.6);">MCP servers, code interpreter, tool discovery</p>
         </div>
       </div>
-      <div class="card-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; text-align: left; max-width: 740px; margin-left: auto; margin-right: auto;">
+      <div class="card-grid card-grid-3" style="margin-top: 1.5rem; text-align: left;">
         <div class="card">
-          <h3 style="color: white;">Ch 4: Deploy</h3>
-          <p style="color: rgba(255,255,255,0.6);">UI, CLI &amp; Asset Bundles &mdash; three ways to ship</p>
+          <h3 style="color: white;">Ch 4: Bundles</h3>
+          <p style="color: rgba(255,255,255,0.6);">Declarative deploy with databricks.yml</p>
         </div>
         <div class="card">
           <h3 style="color: white;">Ch 5: Memory</h3>
-          <p style="color: rgba(255,255,255,0.6);">Conversation history &amp; persistent user knowledge via Lakebase</p>
+          <p style="color: rgba(255,255,255,0.6);">Conversation history &amp; user knowledge via Lakebase</p>
+        </div>
+        <div class="card">
+          <h3 style="color: white;">Ch 6: SDK</h3>
+          <p style="color: rgba(255,255,255,0.6);">Programmatic deploy with Python SDK</p>
         </div>
       </div>
       <div style="margin-top: 2rem;">

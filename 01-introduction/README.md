@@ -461,6 +461,21 @@ databricks bundle deploy
 
 **Best for:** Production deployments, team collaboration, multi-environment (dev/staging/prod).
 
+### 4. Deploy from Python SDK
+
+The Databricks Python SDK provides full programmatic control over the app lifecycle via `WorkspaceClient().apps`. Create, deploy, update, stop, and delete apps entirely in Python:
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.apps import App, AppDeployment
+
+w = WorkspaceClient()
+w.apps.create_and_wait(App(name="my-agent", resources=[...]))
+w.apps.deploy_and_wait("my-agent", AppDeployment(source_code_path="..."))
+```
+
+**Best for:** CI/CD pipelines, notebook-based deployment, dynamic provisioning, integration testing.
+
 ### Comparison
 
 | Method | Config File | Commands | Resource Management | Best For |
@@ -468,6 +483,7 @@ databricks bundle deploy
 | **Workspace UI** | None | Click-through | Visual form | Exploration |
 | **CLI** | `app.yaml` | 3 commands | Manual in UI | Development |
 | **Asset Bundles** | `databricks.yml` | 1 command | Declarative in YAML | Production |
+| **Python SDK** | Python code | Python script | Python objects | CI/CD, automation |
 
 > **Note:** Deployed apps require **OAuth tokens** (not PATs) for API access. Use `databricks auth token` to get one.
 
