@@ -1,6 +1,6 @@
 # Chapter 1: Introduction to Agents on Apps
 
-> **[Open the Workshop Presentation](../docs/agents-on-apps-workshop.html)** -- Interactive slide deck to follow along with this workshop.
+<sub>[Slide Deck](../docs/agents-on-apps-workshop.html) -- open in browser to present</sub>
 
 ## What is an "Agent on an App"?
 
