@@ -65,7 +65,7 @@ resources:
     agent_app:
       name: agents-workshop-${var.resource_name_suffix}
       description: "Workshop agent with custom tools and MCP integration"
-      source_code_path: .
+      source_code_path: .  # Or use git_repository + git_source (see below)
 
       # App runtime configuration (replaces app.yaml)
       config:
@@ -186,6 +186,24 @@ resources:
       name: databricks-claude-sonnet-4-5
       permission: CAN_QUERY
 ```
+
+### Git Repository as App Source
+
+Instead of `source_code_path: .` (which syncs local files to the workspace), you can deploy directly from a Git repository:
+
+```yaml
+resources:
+  apps:
+    agent_app:
+      git_repository:
+        url: https://github.com/org/repo
+        provider: gitHub
+      git_source:
+        branch: main
+        source_code_path: ./03-agent-with-mcp
+```
+
+Supported providers: `gitHub`, `gitLab`, `azureDevOpsServices`, `bitbucketCloud`, `awsCodeCommit`. You can also reference a `tag` or `commit` instead of `branch`.
 
 ### `targets:` - Multi-Environment Deployment
 

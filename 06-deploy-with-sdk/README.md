@@ -33,6 +33,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.apps import (
     App, AppDeployment, AppResource,
     AppResourceExperiment, AppResourceServingEndpoint, EnvVar,
+    GitSource, GitRepository,
 )
 
 w = WorkspaceClient()
@@ -67,8 +68,10 @@ app = w.apps.create_and_wait(
 
 ### Deploy the App
 
+You can deploy from a **workspace directory** or a **Git repository**:
+
 ```python
-# Deploy from a workspace path
+# Option 1: Deploy from a workspace path
 deployment = w.apps.deploy_and_wait(
     app_name="my-agent",
     app_deployment=AppDeployment(
@@ -76,6 +79,21 @@ deployment = w.apps.deploy_and_wait(
         env_vars=[
             EnvVar(name="MLFLOW_TRACKING_URI", value="databricks"),
         ],
+    ),
+)
+
+# Option 2: Deploy from a Git repository
+deployment = w.apps.deploy_and_wait(
+    app_name="my-agent",
+    app_deployment=AppDeployment(
+        git_source=GitSource(
+            git_repository=GitRepository(
+                url="https://github.com/org/repo",
+                provider="gitHub",
+            ),
+            branch="main",
+            source_code_path="./apps/my-agent",
+        ),
     ),
 )
 print(f"Deployed: {deployment.status.state.value}")

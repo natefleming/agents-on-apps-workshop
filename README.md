@@ -10,7 +10,7 @@ Build, test, and deploy AI agents on Databricks Apps. This workshop takes you fr
 - How to build a LangGraph agent with custom tools using the MLflow AgentServer
 - How to connect your agent to MCP (Model Context Protocol) servers for powerful, pre-built tool capabilities
 - How to add short-term and long-term memory to your agent with Lakebase
-- How to deploy via the **Workspace UI**, **CLI**, or **Automation Bundles**
+- How to deploy via the **Workspace UI**, **CLI**, or **Automation Bundles** -- from a workspace directory or directly from a **Git repository**
 - How to use Databricks Automation Bundles for declarative, repeatable deployments
 
 ## Prerequisites

@@ -374,6 +374,8 @@ Try a multi-turn conversation:
 
 Deployment requires adding the Lakebase project, embedding endpoint, and other resources. Choose the deployment method that fits your workflow.
 
+> **App Source Options:** All deployment methods support two source types -- a **workspace directory** (sync code to `/Workspace/Users/...`) or a **Git repository** (deploy directly from a branch, tag, or commit). Configure the git repo at app creation with `git_repository: {url, provider}`, then deploy with `git_source: {branch, source_code_path}`. See the [presentation](../docs/agents-on-apps-workshop.html) for full syntax examples.
+
 ### Option A: Deploy from Workspace UI
 
 1. In the Databricks workspace, navigate to **Compute > Apps**
