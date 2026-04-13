@@ -11,7 +11,7 @@ An agent that has access to two custom tools:
 
 These are simple tools, but they demonstrate the core pattern: your agent decides *when* to call a tool based on the user's message, calls it, and incorporates the result into its response.
 
-```mermaid
+<!-- Mermaid source for Agent Tool Calling Sequence (re-render: mmdc -i input.mmd -o 02-tool-calling.svg -t neutral -b transparent)
 sequenceDiagram
     participant U as User
     participant A as Agent (LangGraph)
@@ -26,7 +26,10 @@ sequenceDiagram
     A->>L: Tool result: "714"
     L-->>A: "42 * 17 = 714"
     A->>U: "42 multiplied by 17 equals 714."
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/02-tool-calling.svg" alt="Agent Tool Calling Sequence">
+</p>
 
 ## Step 1: Set Up Your Environment
 
@@ -81,7 +84,7 @@ MLFLOW_EXPERIMENT_ID=1234567890     # from the step above
 
 ## Step 2: Understand the Code
 
-```mermaid
+<!-- Mermaid source for Project File Structure (re-render: mmdc -i input.mmd -o 02-project-structure.svg -t neutral -b transparent)
 graph LR
     subgraph FILES["Project Structure"]
         direction TB
@@ -107,7 +110,10 @@ graph LR
     style WHAT fill:#00A972,stroke:#00A972,color:#fff
     style BOOT fill:#618693,stroke:#618693,color:#fff
     style DEPS fill:#618693,stroke:#618693,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/02-project-structure.svg" alt="Project File Structure">
+</p>
 
 ### `agent_server/agent.py` - The Core Agent Logic
 

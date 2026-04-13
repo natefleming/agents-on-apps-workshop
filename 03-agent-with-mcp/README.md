@@ -6,7 +6,7 @@ In this chapter, you'll extend your agent with **MCP (Model Context Protocol)** 
 
 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) is an open protocol that standardizes how AI agents discover and use tools. Think of it like a USB port for AI tools -- any MCP-compatible server can plug into any MCP-compatible agent.
 
-```mermaid
+<!-- Mermaid source for MCP Server Architecture (re-render: mmdc -i input.mmd -o 03-mcp-architecture.svg -t neutral -b transparent)
 graph LR
     AGENT["Your Agent<br/><i>LangGraph</i>"] -->|"get_tools()"| CLIENT["DatabricksMulti<br/>ServerMCPClient"]
 
@@ -26,7 +26,10 @@ graph LR
     style T1 fill:#1B3139,stroke:#618693,color:#fff
     style T2 fill:#1B3139,stroke:#618693,color:#fff
     style T3 fill:#1B3139,stroke:#618693,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/03-mcp-architecture.svg" alt="MCP Server Architecture">
+</p>
 
 Databricks provides several built-in MCP servers:
 
@@ -130,7 +133,7 @@ When a user sends a message, the LLM sees descriptions of ALL available tools (b
 - **What time is it?** Use the `get_current_time` custom tool
 - **Complex analysis, data manipulation, or code?** Use `python_exec` from the MCP server
 
-```mermaid
+<!-- Mermaid source for Agent Tool Selection (re-render: mmdc -i input.mmd -o 03-tool-selection.svg -t neutral -b transparent)
 flowchart TD
     MSG["User Message"] --> LLM{"LLM Analyzes<br/>Intent"}
 
@@ -153,7 +156,10 @@ flowchart TD
     style DIRECT fill:#4259FE,stroke:#4259FE,color:#fff
     style RESULT fill:#1B5162,stroke:#618693,color:#fff
     style USER fill:#1B3139,stroke:#618693,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/03-tool-selection.svg" alt="Agent Tool Selection">
+</p>
 
 ## Step 3: Run Locally
 

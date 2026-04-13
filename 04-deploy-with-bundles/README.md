@@ -198,7 +198,7 @@ targets:
     mode: production   # Full deployment
 ```
 
-```mermaid
+<!-- Mermaid source for Multi-Target Deployment (re-render: mmdc -i input.mmd -o 04-targets.svg -t neutral -b transparent)
 graph TB
     BUNDLE["databricks.yml"] --> DEV["dev target<br/><i>mode: development</i><br/>agents-workshop-dev-nate"]
     BUNDLE --> STAGING["staging target<br/><i>mode: production</i><br/>agents-workshop-staging"]
@@ -215,11 +215,14 @@ graph TB
     style WS1 fill:#1B3139,stroke:#00A972,color:#fff
     style WS2 fill:#1B3139,stroke:#FEAB03,color:#fff
     style WS3 fill:#1B3139,stroke:#4259FE,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/04-targets.svg" alt="Multi-Target Deployment">
+</p>
 
 ## Step 2: Deploy
 
-```mermaid
+<!-- Mermaid source for Bundle Deploy Pipeline (re-render: mmdc -i input.mmd -o 04-deploy-pipeline.svg -t neutral -b transparent)
 graph LR
     subgraph LOCAL["Your Laptop"]
         CODE["Agent Code"]
@@ -249,7 +252,10 @@ graph LR
     style SYNC fill:#4259FE,stroke:#4259FE,color:#fff
     style PERMS fill:#4259FE,stroke:#4259FE,color:#fff
     style LIVE fill:#00A972,stroke:#00A972,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/04-deploy-pipeline.svg" alt="Bundle Deploy Pipeline">
+</p>
 
 ### Deploy to Dev (Default)
 

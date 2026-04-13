@@ -272,43 +272,8 @@
     </div>
   </section>
 
-  <!-- Slide 4: Dev Workflow -->
-  <section class="slide slide-white" aria-label="Slide 4: Development Workflow">
-    <div class="slide-content">
-      <div class="section-label">Developer Experience</div>
-      <h2>Local Development Workflow</h2>
-      <div class="accent-line"></div>
-      <div class="timeline" style="margin-top: 2rem;">
-        <div class="timeline-item">
-          <h4>1. Authenticate</h4>
-          <p><span class="inline-code">databricks auth login</span></p>
-        </div>
-        <div class="timeline-item">
-          <h4>2. Configure</h4>
-          <p><span class="inline-code">cp .env.example .env.local</span> &mdash; set experiment ID & profile</p>
-        </div>
-        <div class="timeline-item">
-          <h4>3. Install</h4>
-          <p><span class="inline-code">uv sync</span> &mdash; install Python dependencies</p>
-        </div>
-        <div class="timeline-item">
-          <h4>4. Run</h4>
-          <p><span class="inline-code">uv run start-app</span> &mdash; backend + chat UI at localhost:8000</p>
-        </div>
-        <div class="timeline-item">
-          <h4>5. Iterate</h4>
-          <p><span class="inline-code">uv run start-server --reload</span> &mdash; hot-reload on save</p>
-        </div>
-        <div class="timeline-item">
-          <h4>6. Test via API</h4>
-          <p><span class="inline-code">curl -X POST localhost:8000/invocations -d '{"input": [...]}'</span></p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Slide 5: Deployment Overview -->
-  <section class="slide slide-ink" aria-label="Slide 5: Three Deployment Methods">
+  <!-- Slide 4: Deployment Overview -->
+  <section class="slide slide-ink" aria-label="Slide 4: Three Deployment Methods">
     <div class="slide-content" style="text-align: center;">
       <div class="section-label">Deployment</div>
       <h2>Three Ways to Deploy</h2>
@@ -338,8 +303,8 @@
     </div>
   </section>
 
-  <!-- Slide 6: Deploy from UI -->
-  <section class="slide slide-white" aria-label="Slide 6: Deploy from Workspace UI">
+  <!-- Slide 5: Deploy from UI -->
+  <section class="slide slide-white" aria-label="Slide 5: Deploy from Workspace UI">
     <div class="slide-content">
       <div class="section-label">Deployment &mdash; Option A</div>
       <h2>Deploy from Workspace UI</h2>
@@ -397,8 +362,8 @@
     </div>
   </section>
 
-  <!-- Slide 7: Deploy from CLI -->
-  <section class="slide slide-dark" aria-label="Slide 7: Deploy from CLI">
+  <!-- Slide 6: Deploy from CLI -->
+  <section class="slide slide-dark" aria-label="Slide 6: Deploy from CLI">
     <div class="slide-content">
       <div class="section-label">Deployment &mdash; Option B</div>
       <h2>Deploy from CLI</h2>
@@ -449,8 +414,8 @@ curl -X POST &lt;app-url&gt;/invocations \
     </div>
   </section>
 
-  <!-- Slide 8: Deploy from Asset Bundles -->
-  <section class="slide slide-light" aria-label="Slide 8: Deploy from Asset Bundles">
+  <!-- Slide 7: Deploy from Asset Bundles -->
+  <section class="slide slide-light" aria-label="Slide 7: Deploy from Asset Bundles">
     <div class="slide-content">
       <div class="section-label">Deployment &mdash; Option C</div>
       <h2>Deploy from Asset Bundles</h2>
@@ -514,6 +479,41 @@ databricks bundle destroy</div>
             <li>Multi-target: dev / staging / prod</li>
             <li>Variables avoid name collisions per user</li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: Dev Workflow -->
+  <section class="slide slide-white" aria-label="Slide 8: Development Workflow">
+    <div class="slide-content">
+      <div class="section-label">Developer Experience</div>
+      <h2>Local Development Workflow</h2>
+      <div class="accent-line"></div>
+      <div class="timeline" style="margin-top: 2rem;">
+        <div class="timeline-item">
+          <h4>1. Authenticate</h4>
+          <p><span class="inline-code">databricks auth login</span></p>
+        </div>
+        <div class="timeline-item">
+          <h4>2. Configure</h4>
+          <p><span class="inline-code">cp .env.example .env.local</span> &mdash; set experiment ID & profile</p>
+        </div>
+        <div class="timeline-item">
+          <h4>3. Install</h4>
+          <p><span class="inline-code">uv sync</span> &mdash; install Python dependencies</p>
+        </div>
+        <div class="timeline-item">
+          <h4>4. Run</h4>
+          <p><span class="inline-code">uv run start-app</span> &mdash; backend + chat UI at localhost:8000</p>
+        </div>
+        <div class="timeline-item">
+          <h4>5. Iterate</h4>
+          <p><span class="inline-code">uv run start-server --reload</span> &mdash; hot-reload on save</p>
+        </div>
+        <div class="timeline-item">
+          <h4>6. Test via API</h4>
+          <p><span class="inline-code">curl -X POST localhost:8000/invocations -d '{"input": [...]}'</span></p>
         </div>
       </div>
     </div>

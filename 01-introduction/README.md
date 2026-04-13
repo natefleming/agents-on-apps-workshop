@@ -17,7 +17,7 @@ This is the recommended approach for building and deploying agents on Databricks
 
 ## Architecture Overview
 
-```mermaid
+<!-- Mermaid source for Architecture Overview (re-render: mmdc -i input.mmd -o 01-architecture.svg -t neutral -b transparent)
 graph TB
     UI["🖥️ Chat UI — Next.js"]
     SERVER["⚡ MLflow AgentServer — FastAPI /invocations"]
@@ -38,7 +38,10 @@ graph TB
     style MCP fill:#FEAB03,stroke:#c98a02,color:#0B2026
     style TOOLS fill:#970F29,stroke:#6e0b1e,color:#fff
     style MLFLOW fill:#618693,stroke:#4a6a75,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/01-architecture.svg" alt="Architecture Overview">
+</p>
 
 ## Key Components
 
@@ -176,7 +179,7 @@ app = agent_server.app
 
 When your agent runs as a Databricks App, there are **two distinct ways** it can authenticate to access Databricks resources. Understanding when to use each is critical. See the [Agent Framework authentication docs](https://docs.databricks.com/aws/en/generative-ai/agent-framework/agent-authentication) and the [Databricks Apps auth docs](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth) for the full reference.
 
-```mermaid
+<!-- Mermaid source for SP vs OBO Authentication (re-render: mmdc -i input.mmd -o 01-auth-comparison.svg -t neutral -b transparent)
 graph TD
     subgraph SP["① Service Principal Auth"]
         U1["Any User"] --> APP1["App uses SP credentials"]
@@ -195,7 +198,10 @@ graph TD
     style APP2 fill:#00A972,stroke:#008a5c,color:#fff
     style RES1 fill:#1B5162,stroke:#0d3a48,color:#fff
     style RES2 fill:#1B5162,stroke:#0d3a48,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/01-auth-comparison.svg" alt="SP vs OBO Authentication">
+</p>
 
 ### App Service Principal (Resource Auth)
 
@@ -292,7 +298,7 @@ user_client = get_user_workspace_client()
 
 Most production agents use **both** approaches. The service principal handles shared resources while OBO handles user-specific data:
 
-```mermaid
+<!-- Mermaid source for Combined Authentication (re-render: mmdc -i input.mmd -o 01-auth-combined.svg -t neutral -b transparent)
 graph LR
     USER["👤 User"] --> APP["🤖 Agent App"]
     APP -- "SP auth" --> LLM["🧠 LLM Endpoint"]
@@ -306,7 +312,10 @@ graph LR
     style MLF fill:#4259FE,stroke:#2f44d4,color:#fff
     style SQL fill:#00A972,stroke:#008a5c,color:#fff
     style UC fill:#00A972,stroke:#008a5c,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/01-auth-combined.svg" alt="Combined Authentication">
+</p>
 
 > **Blue nodes** = Service Principal auth (shared). **Green nodes** = User token / OBO (per-user permissions).
 
@@ -361,7 +370,7 @@ def get_user_workspace_client() -> WorkspaceClient:
 
 ## Development Workflow
 
-```mermaid
+<!-- Mermaid source for Development Workflow (re-render: mmdc -i input.mmd -o 01-dev-workflow.svg -t neutral -b transparent)
 graph LR
     A["1. databricks auth login"] --> B["2. Configure .env.local"]
     B --> C["3. uv sync"]
@@ -378,7 +387,10 @@ graph LR
     style E fill:#FF3621,stroke:#c42a1a,color:#fff
     style F fill:#4259FE,stroke:#2f44d4,color:#fff
     style G fill:#00A972,stroke:#008a5c,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/01-dev-workflow.svg" alt="Development Workflow">
+</p>
 
 ### Local Development
 

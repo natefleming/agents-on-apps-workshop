@@ -6,7 +6,7 @@ Both types use [Lakebase](https://docs.databricks.com/aws/en/lakebase/), Databri
 
 ## What Are Short-Term and Long-Term Memory?
 
-```mermaid
+<!-- Mermaid source for Memory Architecture (re-render: mmdc -i input.mmd -o 05-memory-architecture.svg -t neutral -b transparent)
 graph LR
     USER["User"] --> AGENT["Agent"]
     AGENT --> STM["Short-Term Memory<br/><i>Conversation history</i>"]
@@ -20,7 +20,10 @@ graph LR
     style LTM fill:#00A972,stroke:#008a5c,color:#fff
     style LB1 fill:#1B3139,stroke:#618693,color:#fff
     style LB2 fill:#1B3139,stroke:#618693,color:#fff
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/05-memory-architecture.svg" alt="Memory Architecture">
+</p>
 
 ### Short-Term Memory (Conversation History)
 
@@ -145,7 +148,7 @@ async def stream_handler(
                 yield event
 ```
 
-```mermaid
+<!-- Mermaid source for Short-Term Memory Flow (re-render: mmdc -i input.mmd -o 05-short-term-flow.svg -t neutral -b transparent)
 sequenceDiagram
     participant U as User
     participant A as Agent
@@ -167,7 +170,10 @@ sequenceDiagram
     LB-->>CP: Previous messages: ["2+2", "4"]
     A->>A: Process with full history
     A-->>U: "40"
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/05-short-term-flow.svg" alt="Short-Term Memory Flow">
+</p>
 
 ### Thread ID Resolution
 
@@ -291,7 +297,7 @@ async def stream_handler(
             yield event
 ```
 
-```mermaid
+<!-- Mermaid source for Long-Term Memory Flow (re-render: mmdc -i input.mmd -o 05-long-term-flow.svg -t neutral -b transparent)
 sequenceDiagram
     participant U as User
     participant A as Agent
@@ -316,7 +322,10 @@ sequenceDiagram
     LB-->>DS: [lang_pref: {language: Python}]
     MT-->>A: "User prefers Python"
     A-->>U: "def sort_list(items):..."
-```
+-->
+<p align="center">
+  <img src="../docs/diagrams/05-long-term-flow.svg" alt="Long-Term Memory Flow">
+</p>
 
 ### System Prompt for Memory
 
