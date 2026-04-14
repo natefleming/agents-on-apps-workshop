@@ -2,7 +2,7 @@
 
 Build, test, and deploy AI agents on Databricks Apps. This workshop takes you from zero to a fully deployed agent with tools and MCP server integration.
 
-> **[Open the Workshop Presentation](./docs/agents-on-apps-workshop.html)** -- Interactive slide deck covering architecture, deployment strategies, and all workshop chapters. Open in your browser to follow along.
+> **[Open the Workshop Presentation](https://natefleming.github.io/agents-on-apps-workshop/docs/agents-on-apps-workshop.html)** -- Interactive slide deck covering architecture, deployment strategies, and all workshop chapters.
 
 ## What You'll Learn
 
